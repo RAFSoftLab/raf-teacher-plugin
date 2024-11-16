@@ -1,4 +1,4 @@
-package org.jetbrains.plugins.template
+package edu.raf.plugins.teacher
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls

@@ -12,7 +12,7 @@
 <!--        <toolWindow factoryClass="org.jetbrains.plugins.template.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>-->
 <!--    </extensions>-->
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="edu.raf.plugins.teacher.toolWindow.MyToolWindowFactory" id="LoginToolWindow"/>
+        <toolWindow factoryClass="edu.raf.plugins.teacher.toolWindow.factory.MyToolWindowFactory" id="LoginToolWindow"/>
     </extensions>
 
 

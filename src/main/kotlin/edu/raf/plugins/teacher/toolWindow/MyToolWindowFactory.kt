@@ -4,7 +4,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
-import edu.raf.plugins.teacher.controller.SubjectController
+import edu.raf.plugins.teacher.controllers.SubjectController
 import edu.raf.plugins.teacher.ui.SubjectComboBox
 
 

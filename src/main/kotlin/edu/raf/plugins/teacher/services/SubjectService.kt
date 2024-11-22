@@ -1,53 +1,41 @@
 package edu.raf.plugins.teacher.services
 
+import edu.raf.plugins.teacher.utils.ConfigLoader
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import java.io.IOException
 import javax.swing.JOptionPane
+import okhttp3.Response
+
 
 class SubjectService {
 
-    private val client = OkHttpClient()
+    private val apiClient = APIClient()
+    private val apiUrl = ConfigLoader.get("api.url")
+    private val apiToken = ConfigLoader.get("api.token")
 
     fun getSubjects(): List<String> {
-        return try {
-            val request = Request.Builder()
-                .url("http://192.168.124.28:8091/api/v1/subjects")
-                .addHeader(
-                    "Authorization",
-                    "Bearer L2aTA643Z0UJ43bIdBymFExVbpqZg7v5QJafYh6KFRjl04eV6w4TtdppkX41hEwo"
-                )
-                .build()
+        val response: Response? = apiClient.sendGetRequest(
+            "http://192.168.124.28:8091/api/v1/subjects",
+            "L2aTA643Z0UJ43bIdBymFExVbpqZg7v5QJafYh6KFRjl04eV6w4TtdppkX41hEwo"
+        )
 
-            val response = client.newCall(request).execute()
+        return if (response != null && response.isSuccessful) {
             val responseBody = response.body?.string()
-
-            if (response.isSuccessful && responseBody != null) {
-                parseSubjects(responseBody)
-            } else {
-                println("API returned an error: ${response.code} ${response.message}")
-                emptyList()
-            }
-        } catch (e: IOException) {
-            // Prikazuje pop-up prozor u slučaju greške povezivanja
+            parseSubjects(responseBody)
+        } else {
             JOptionPane.showMessageDialog(
                 null,
-                "Nije moguće povezati se na server. Proverite Vašu mrežnu konekciju.",
-                "Greška pri povezivanju",
+                "Greška pri povezivanju sa serverom. Proverite mrežnu konekciju.",
+                "Greška",
                 JOptionPane.ERROR_MESSAGE
             )
-            e.printStackTrace()
-            emptyList()
-        } catch (e: Exception) {
-            // Ostale greške (npr. parsiranje)
-            println("Unexpected error: ${e.message}")
-            e.printStackTrace()
             emptyList()
         }
     }
 
-    private fun parseSubjects(responseBody: String): List<String> {
+    private fun parseSubjects(responseBody: String?): List<String> {
         return try {
             val jsonArray = JSONArray(responseBody)
             val subjects = mutableListOf<String>()
@@ -58,10 +46,9 @@ class SubjectService {
                 subjects.add(name)
             }
 
-            println("Successfully parsed subjects: $subjects")
             subjects
         } catch (e: Exception) {
-            println("Error parsing JSON: ${e.message}")
+            println("Greška pri parsiranju JSON-a: ${e.message}")
             e.printStackTrace()
             emptyList()
         }

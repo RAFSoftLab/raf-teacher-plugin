@@ -1,4 +1,4 @@
-package edu.raf.plugins.teacher.controller
+package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.SubjectComboBox

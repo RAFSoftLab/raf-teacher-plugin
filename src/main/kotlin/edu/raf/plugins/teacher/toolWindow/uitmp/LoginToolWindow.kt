@@ -1,4 +1,4 @@
-package edu.raf.plugins.teacher.toolWindow.ui
+package edu.raf.plugins.teacher.toolWindow.uitmp
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow

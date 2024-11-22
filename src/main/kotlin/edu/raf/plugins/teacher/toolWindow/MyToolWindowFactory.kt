@@ -11,11 +11,13 @@ import edu.raf.plugins.teacher.ui.SubjectComboBox
 class MyToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        // Kreiranje instance nove klase koja sadrži ComboBox
+        // Kreiranje instance klase sa ComboBox-om
         val subjectComboBox = SubjectComboBox()
+        // Null je da bi uhvatio default ID iz plugina
         val content = ContentFactory.getInstance().createContent(subjectComboBox, null, false)
         toolWindow.contentManager.addContent(content)
     }
 
     override fun shouldBeAvailable(project: Project) = true
 }
+

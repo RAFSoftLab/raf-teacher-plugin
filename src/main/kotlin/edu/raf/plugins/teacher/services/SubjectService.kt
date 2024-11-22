@@ -8,27 +8,35 @@ import java.io.IOException
 import javax.swing.JOptionPane
 import okhttp3.Response
 
-
 class SubjectService {
 
-    private val apiClient = APIClient()
+    private val client = OkHttpClient()
     private val apiUrl = ConfigLoader.get("api.url")
     private val apiToken = ConfigLoader.get("api.token")
 
     fun getSubjects(): List<String> {
-        val response: Response? = apiClient.sendGetRequest(
-            "http://192.168.124.28:8091/api/v1/subjects",
-            "L2aTA643Z0UJ43bIdBymFExVbpqZg7v5QJafYh6KFRjl04eV6w4TtdppkX41hEwo"
-        )
+        val request = Request.Builder()
+            .url(apiUrl)
+            .addHeader("Authorization", "Bearer $apiToken")
+            .build()
 
-        return if (response != null && response.isSuccessful) {
+        return try {
+            val response = client.newCall(request).execute()
             val responseBody = response.body?.string()
-            parseSubjects(responseBody)
-        } else {
+
+            if (response.isSuccessful && responseBody != null) {
+                parseSubjects(responseBody)
+            } else {
+                println("API error: ${response.code}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Prikazuje pop-up greške
             JOptionPane.showMessageDialog(
                 null,
-                "Greška pri povezivanju sa serverom. Proverite mrežnu konekciju.",
-                "Greška",
+                "Nije moguće povezati se na server. Proverite Vašu mrežnu konekciju.",
+                "Greška pri povezivanju",
                 JOptionPane.ERROR_MESSAGE
             )
             emptyList()

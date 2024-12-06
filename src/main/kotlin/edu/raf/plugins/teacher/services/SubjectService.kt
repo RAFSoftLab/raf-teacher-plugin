@@ -1,49 +1,26 @@
 package edu.raf.plugins.teacher.services
 
+import edu.raf.plugins.teacher.utils.ApiClient
 import edu.raf.plugins.teacher.utils.ConfigLoader
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.json.JSONArray
 import java.io.IOException
-import javax.swing.JOptionPane
-import okhttp3.Response
 
 class SubjectService {
 
-    private val client = OkHttpClient()
-    private val apiUrl = ConfigLoader.get("api.url")
-    private val apiToken = ConfigLoader.get("api.token")
+    private val apiClient = ApiClient(
+        ConfigLoader.get("api.url"),
+        ConfigLoader.get("api.token")
+    )
 
+    @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
     fun getSubjects(): List<String> {
-        val request = Request.Builder()
-            .url(apiUrl)
-            .addHeader("Authorization", "Bearer $apiToken")
-            .build()
+        val responseBody = apiClient.get("/subjects")
+            ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
 
-        return try {
-            val response = client.newCall(request).execute()
-            val responseBody = response.body?.string()
-
-            if (response.isSuccessful && responseBody != null) {
-                parseSubjects(responseBody)
-            } else {
-                println("API error: ${response.code}")
-                emptyList()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Prikazuje pop-up greške
-            JOptionPane.showMessageDialog(
-                null,
-                "Nije moguće povezati se na server. Proverite Vašu mrežnu konekciju.",
-                "Greška pri povezivanju",
-                JOptionPane.ERROR_MESSAGE
-            )
-            emptyList()
-        }
+        return parseSubjects(responseBody)
     }
 
-    private fun parseSubjects(responseBody: String?): List<String> {
+    private fun parseSubjects(responseBody: String): List<String> {
         return try {
             val jsonArray = JSONArray(responseBody)
             val subjects = mutableListOf<String>()
@@ -56,9 +33,7 @@ class SubjectService {
 
             subjects
         } catch (e: Exception) {
-            println("Greška pri parsiranju JSON-a: ${e.message}")
-            e.printStackTrace()
-            emptyList()
+            throw IOException("Greška pri parsiranju JSON-a: ${e.message}", e)
         }
     }
 }

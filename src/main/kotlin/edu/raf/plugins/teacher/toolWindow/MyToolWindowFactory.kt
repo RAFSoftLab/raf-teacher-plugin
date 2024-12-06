@@ -15,7 +15,7 @@ class MyToolWindowFactory : ToolWindowFactory {
         // Kreiranje instance klase sa ComboBox-om
         val subjectComboBox = SubjectComboBox()
 
-        // Kreiranje kontrolera sa pogledom
+        // Kreiranje kontrolera sa viewom
         val controller = SubjectController(subjectComboBox)
 
         // Učitavanje predmeta

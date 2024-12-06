@@ -20,6 +20,20 @@ class SubjectComboBox : JPanel() {
     }
     val submitButton: JButton = JButton("Unesi")
 
+    fun setLoading(loading: Boolean) {
+        // Onemogući ili omogući sve komponente unutar panela
+        components.forEach { it.isEnabled = !loading }
+
+        // Ako je učitavanje u toku, prikaži poruku u ComboBox-u
+        if (loading) {
+            comboBox.removeAllItems()
+            comboBox.addItem("Učitavanje...")
+        } else {
+            comboBox.removeAllItems() // Ukloni placeholder kada završi učitavanje
+        }
+    }
+
+
     init {
         // Podešavanje rasporeda elemenata na horizontalni
         layout = FlowLayout(FlowLayout.LEFT, 10, 10)

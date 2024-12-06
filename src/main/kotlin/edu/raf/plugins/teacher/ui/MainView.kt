@@ -1,7 +1,9 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
+import edu.raf.plugins.teacher.utils.Utils.Companion.generateSchoolYear
 import java.awt.*
+import java.time.LocalDate
 import javax.swing.*
 import java.util.concurrent.TimeUnit
 
@@ -10,7 +12,7 @@ class MainView : JPanel() {
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
     val currentYearLabel: JLabel = JLabel("Tekuća godina:")
-    val currentYearInput: JTextField = JTextField("2024/25", 7)
+    val currentYearInput: JTextField = JTextField(generateSchoolYear(LocalDate.now()), 7)
 
     val testNameLabel: JLabel = JLabel("Naziv provere znanja:")
     val testNameInput: JTextField = JTextField(12).apply {

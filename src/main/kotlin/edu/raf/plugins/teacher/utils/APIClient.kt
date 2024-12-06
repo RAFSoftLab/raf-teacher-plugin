@@ -16,8 +16,7 @@ class ApiClient(private val baseUrl: String, private val token: String) {
 
 
 
-        // Definišemo URL i header
-        println("URL " + baseUrl)
+
         val url = "http://192.168.124.28:8091/api/v1$endpoint"
         val request = Request.Builder()
             .url(url)

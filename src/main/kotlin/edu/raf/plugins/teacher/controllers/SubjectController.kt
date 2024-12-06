@@ -1,11 +1,11 @@
 package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.services.SubjectService
-import edu.raf.plugins.teacher.ui.SubjectComboBox
+import edu.raf.plugins.teacher.ui.MainView
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 
-class SubjectController(private val view: SubjectComboBox) {
+class SubjectController(private val view: MainView) {
 
     private val service = SubjectService()
 
@@ -14,7 +14,6 @@ class SubjectController(private val view: SubjectComboBox) {
             try {
                 val subjects = service.getSubjects()
 
-                print("Uspesno jee!")
 
                 // Ako je učitavanje uspešno, osveži prikaz
                 SwingUtilities.invokeLater {

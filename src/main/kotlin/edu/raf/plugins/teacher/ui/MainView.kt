@@ -3,6 +3,7 @@ package edu.raf.plugins.teacher.ui
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
 import java.awt.*
 import javax.swing.*
+import java.util.concurrent.TimeUnit
 
 class MainView : JPanel() {
     val comboBoxSubjects: JComboBox<String> = JComboBox()
@@ -18,6 +19,9 @@ class MainView : JPanel() {
     }
 
     val submitButton: JButton = JButton("Unesi")
+    val postaviButton: JButton = JButton("Postavi").apply {
+        isEnabled = false // Na početku je dugme onemogućeno
+    }
 
     init {
         // Koristimo GridBagLayout za fleksibilnost u rasporedu
@@ -60,7 +64,13 @@ class MainView : JPanel() {
         constraints.gridwidth = 2 // Dugme zauzima celu širinu
         add(submitButton, constraints)
 
-        // Akcija na dugme
+        // Peti red (dugme za postavljanje)
+        constraints.gridx = 0
+        constraints.gridy = 4
+        constraints.gridwidth = 2
+        add(postaviButton, constraints)
+
+        // Akcija na dugme "Unesi"
         submitButton.addActionListener {
             val selectedSubject = comboBoxSubjects.selectedItem ?: "Nijedan predmet"
             val year = currentYearInput.text
@@ -72,7 +82,51 @@ class MainView : JPanel() {
                 "Informacije",
                 JOptionPane.INFORMATION_MESSAGE
             )
+
+            // Pozivanje lažnog API poziva
+            simulateApiCall()
         }
+
+        // Akcija na dugme "Postavi"
+        postaviButton.addActionListener {
+            JOptionPane.showMessageDialog(
+                null,
+                "Podaci su postavljeni.",
+                "Uspešno",
+                JOptionPane.INFORMATION_MESSAGE
+            )
+        }
+    }
+
+    // Lažni API poziv koji simulira uspesan odgovor
+    private fun simulateApiCall() {
+        // Koristimo SwingWorker da simuliramo API poziv
+        object : SwingWorker<Void, Void>() {
+            override fun doInBackground(): Void? {
+                // Simulacija trajanja poziva
+                try {
+                    TimeUnit.SECONDS.sleep(2)
+                } catch (e: InterruptedException) {
+                    e.printStackTrace()
+                }
+                return null
+            }
+
+            override fun done() {
+                // Simuliramo odgovor "success"
+                val success = true
+                if (success) {
+                    postaviButton.isEnabled = true // Omogućavamo dugme "Postavi"
+                } else {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Došlo je do greške prilikom postavljanja podataka.",
+                        "Greška",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+                }
+            }
+        }.execute()
     }
 
     // Metod za ažuriranje ComboBox-a

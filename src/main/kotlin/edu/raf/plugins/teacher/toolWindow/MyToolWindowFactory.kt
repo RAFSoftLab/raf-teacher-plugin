@@ -4,9 +4,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
+import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.controllers.SubjectController
-import edu.raf.plugins.teacher.ui.CreateTestView
+import edu.raf.plugins.teacher.ui.CreateExamView
+import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.CardLayout
+import java.net.URL
+import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JPanel
 
@@ -18,7 +22,11 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         // Početni meni
         val menuPanel = JPanel()
-        val createTestButton = JButton("Kreiraj proveru znanja")
+        val iconCreatTest = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.CREATE_TEST_IMAGE)))
+
+        val createTestButton: JButton = JButton("Postavi proveru znanja").apply {
+            icon = iconCreatTest
+        }
         val retrieveTestButton = JButton("Preuzmi proveru znanja")
 
         menuPanel.add(createTestButton)
@@ -30,13 +38,13 @@ class MyToolWindowFactory : ToolWindowFactory {
         // Akcija za dugme "Kreiraj proveru znanja"
         createTestButton.addActionListener {
             // Dinamičko kreiranje sadržaja za "Kreiraj proveru znanja"
-            val createTestView = CreateTestView()
-            val controller = SubjectController(createTestView)
+            val createExamView = CreateExamView()
+            val controller = SubjectController(createExamView)
             controller.loadSubjects()
 
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
-            if (mainPanel.components.none { it == createTestView }) {
-                mainPanel.add(createTestView, "CreateTest")
+            if (mainPanel.components.none { it == createExamView }) {
+                mainPanel.add(createExamView, "CreateTest")
             }
 
             // Prebacivanje na ekran za "Kreiraj proveru znanja"

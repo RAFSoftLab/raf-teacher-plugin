@@ -10,7 +10,7 @@ import java.time.LocalDate
 import javax.swing.*
 import java.util.concurrent.TimeUnit
 
-class CreateTestView : JPanel() {
+class CreateExamView : JPanel() {
     val comboBoxSubjects: JComboBox<String> = JComboBox()
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
@@ -26,11 +26,11 @@ class CreateTestView : JPanel() {
     val submitButton: JButton = JButton("Unesi")
 
 
-    val iconTMP = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
+    val iconContent = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
 
     val postaviButton: JButton = JButton("Postavi").apply {
         isEnabled = false // Na početku je dugme onemogućeno
-        icon = iconTMP
+        icon = iconContent
     }
 
     init {

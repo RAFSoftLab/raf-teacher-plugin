@@ -1,8 +1,11 @@
 package edu.raf.plugins.teacher.ui
 
+import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
+import edu.raf.plugins.teacher.utils.ImageLoader
 import edu.raf.plugins.teacher.utils.Utils.Companion.generateSchoolYear
 import java.awt.*
+import java.net.URL
 import java.time.LocalDate
 import javax.swing.*
 import java.util.concurrent.TimeUnit
@@ -21,13 +24,19 @@ class MainView : JPanel() {
     }
 
     val submitButton: JButton = JButton("Unesi")
+
+
+    val iconTMP = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
+
     val postaviButton: JButton = JButton("Postavi").apply {
         isEnabled = false // Na početku je dugme onemogućeno
+        icon = iconTMP
     }
 
     init {
         // Koristimo GridBagLayout za fleksibilnost u rasporedu
         layout = GridBagLayout()
+
         val constraints = GridBagConstraints()
 
         constraints.fill = GridBagConstraints.HORIZONTAL

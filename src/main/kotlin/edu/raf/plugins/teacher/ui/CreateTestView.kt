@@ -10,7 +10,7 @@ import java.time.LocalDate
 import javax.swing.*
 import java.util.concurrent.TimeUnit
 
-class MainView : JPanel() {
+class CreateTestView : JPanel() {
     val comboBoxSubjects: JComboBox<String> = JComboBox()
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 

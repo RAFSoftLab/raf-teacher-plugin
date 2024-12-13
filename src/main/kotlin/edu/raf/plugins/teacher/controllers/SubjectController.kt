@@ -1,11 +1,11 @@
 package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.services.SubjectService
-import edu.raf.plugins.teacher.ui.MainView
+import edu.raf.plugins.teacher.ui.CreateTestView
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
 
-class SubjectController(private val view: MainView) {
+class SubjectController(private val view: CreateTestView) {
 
     private val service = SubjectService()
 

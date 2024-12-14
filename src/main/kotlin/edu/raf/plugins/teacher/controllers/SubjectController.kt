@@ -4,39 +4,34 @@ import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
 import javax.swing.JOptionPane
 import javax.swing.SwingUtilities
+import javax.swing.SwingWorker
 
 class SubjectController(private val view: CreateExamView) {
 
     private val service = SubjectService()
 
     fun loadSubjects() {
-        SwingUtilities.invokeLater {
-            try {
-                val subjects = service.getSubjects()
+        object : SwingWorker<List<String>, Void>() {
+            override fun doInBackground(): List<String> {
+                // Dugotrajna operacija
+                return service.getSubjects()
+            }
 
-
-                // Ako je učitavanje uspešno, osveži prikaz
-                SwingUtilities.invokeLater {
-                   // view.setLoading(false)
+            override fun done() {
+                try {
+                    val subjects = get() // Rezultat poziva
                     view.updateSubjects(subjects)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-
-                view.isVisible = false // Sakriva view
-
-                // Prikazuje poruku o grešci korisniku
-                SwingUtilities.invokeLater {
+                } catch (e: Exception) {
                     JOptionPane.showMessageDialog(
                         null,
                         "Nije moguće povezati se na server. Proverite Vašu mrežnu konekciju.",
                         "Greška pri povezivanju",
                         JOptionPane.ERROR_MESSAGE
                     )
-                   // view.setLoading(false) // Zaustavlja animaciju učitavanja
-                    view.isVisible = false // Sakriva view
                 }
             }
-        }
+        }.execute()
     }
+
+
 }

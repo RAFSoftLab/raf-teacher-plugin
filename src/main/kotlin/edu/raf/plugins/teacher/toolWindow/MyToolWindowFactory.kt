@@ -22,15 +22,19 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         // Početni meni
         val menuPanel = JPanel()
-        val iconCreatTest = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.CREATE_TEST_IMAGE)))
+        val createExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.CREATE_EXAM_IMAGE)))
+        val downloadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.DOWNLOAD_EXAM_IMAGE)))
 
         val createTestButton: JButton = JButton("Postavi proveru znanja").apply {
-            icon = iconCreatTest
+            icon = createExamIcon
         }
-        val retrieveTestButton = JButton("Preuzmi proveru znanja")
+        val downloadExamButton: JButton = JButton("Preuzmi proveru znanja").apply {
+            icon = downloadExamIcon
+        }
+
 
         menuPanel.add(createTestButton)
-        menuPanel.add(retrieveTestButton)
+        menuPanel.add(downloadExamButton)
 
         // Dodavanje početnog menija u CardLayout
         mainPanel.add(menuPanel, "Menu")
@@ -51,7 +55,7 @@ class MyToolWindowFactory : ToolWindowFactory {
             cardLayout.show(mainPanel, "CreateTest")
         }
 
-        retrieveTestButton.addActionListener {
+        downloadExamButton.addActionListener {
             // Ovdje možeš dodati logiku za "Preuzmi proveru znanja"
         }
 

@@ -22,6 +22,7 @@ class SubjectService {
 
     private fun parseSubjects(responseBody: String): List<String> {
         return try {
+            
             val jsonArray = JSONArray(responseBody)
             val subjects = mutableListOf<String>()
 

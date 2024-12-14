@@ -1,14 +1,16 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
 import edu.raf.plugins.teacher.utils.ImageLoader
 import edu.raf.plugins.teacher.utils.Utils.Companion.generateSchoolYear
 import java.awt.*
+import java.io.IOException
 import java.net.URL
 import java.time.LocalDate
-import javax.swing.*
 import java.util.concurrent.TimeUnit
+import javax.swing.*
 
 class CreateExamView : JPanel() {
     val comboBoxSubjects: JComboBox<String> = JComboBox()
@@ -24,10 +26,7 @@ class CreateExamView : JPanel() {
     }
 
     val submitButton: JButton = JButton("Unesi")
-
-
     val iconContent = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
-
     val postaviButton: JButton = JButton("Postavi").apply {
         isEnabled = false // Na početku je dugme onemogućeno
         icon = iconContent
@@ -38,7 +37,6 @@ class CreateExamView : JPanel() {
         layout = GridBagLayout()
 
         val constraints = GridBagConstraints()
-
         constraints.fill = GridBagConstraints.HORIZONTAL
         constraints.insets = Insets(5, 5, 5, 5) // Dodajemo razmake između komponenti
 
@@ -48,7 +46,6 @@ class CreateExamView : JPanel() {
         add(labelChooseSubject, constraints)
 
         constraints.gridx = 1
-        constraints.gridy = 0
         add(comboBoxSubjects, constraints)
 
         // Drugi red (label + godina)
@@ -57,7 +54,6 @@ class CreateExamView : JPanel() {
         add(currentYearLabel, constraints)
 
         constraints.gridx = 1
-        constraints.gridy = 1
         add(currentYearInput, constraints)
 
         // Treći red (label + testName)
@@ -66,7 +62,6 @@ class CreateExamView : JPanel() {
         add(testNameLabel, constraints)
 
         constraints.gridx = 1
-        constraints.gridy = 2
         add(testNameInput, constraints)
 
         // Četvrti red (dugme za unos)
@@ -85,6 +80,7 @@ class CreateExamView : JPanel() {
         submitButton.addActionListener {
             val selectedSubject = comboBoxSubjects.selectedItem ?: "Nijedan predmet"
             val year = currentYearInput.text
+            val updatedYear = year.replace("/", "_")
             val testName = testNameInput.text
 
             JOptionPane.showMessageDialog(
@@ -93,8 +89,14 @@ class CreateExamView : JPanel() {
                 "Informacije",
                 JOptionPane.INFORMATION_MESSAGE
             )
+            val examService = ExamService()
+            try {
+                examService.createExam("OOP", updatedYear, testName)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
 
-            // Pozivanje lažnog API poziva
+            // Simulacija poziva na API
             simulateApiCall()
         }
 
@@ -109,7 +111,7 @@ class CreateExamView : JPanel() {
         }
     }
 
-    // Lažni API poziv koji simulira uspesan odgovor
+    // Lažni API poziv koji simulira uspešan odgovor
     private fun simulateApiCall() {
         // Koristimo SwingWorker da simuliramo API poziv
         object : SwingWorker<Void, Void>() {

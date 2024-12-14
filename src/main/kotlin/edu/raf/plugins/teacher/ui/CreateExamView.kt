@@ -17,8 +17,7 @@ import javax.swing.*
 class CreateExamView : JPanel() {
     var listener: ExamViewListener? = null
 
-    var onReturnToMenu: (() -> Unit)? = null // Callback za povratak na meni
-
+    // Komponente za View
     val comboBoxSubjects: JComboBox<Subject> = JComboBox()
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
@@ -34,17 +33,19 @@ class CreateExamView : JPanel() {
     val submitButton: JButton = JButton("Unesi")
     val iconContent = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
     val postaviButton: JButton = JButton("Postavi").apply {
-        isEnabled = false // Na početku je dugme onemogućeno
+        isEnabled = false
         icon = iconContent
     }
 
+    // Novo dugme za povratak na glavni meni
+    val backToMenuButton: JButton = JButton("Vrati se na glavni menu")
+
     init {
-        // Koristimo GridBagLayout za fleksibilnost u rasporedu
         layout = GridBagLayout()
 
         val constraints = GridBagConstraints()
         constraints.fill = GridBagConstraints.HORIZONTAL
-        constraints.insets = Insets(5, 5, 5, 5) // Dodajemo razmake između komponenti
+        constraints.insets = Insets(5, 5, 5, 5)
 
         // Prvi red (label + comboBox)
         constraints.gridx = 0
@@ -73,7 +74,7 @@ class CreateExamView : JPanel() {
         // Četvrti red (dugme za unos)
         constraints.gridx = 0
         constraints.gridy = 3
-        constraints.gridwidth = 2 // Dugme zauzima celu širinu
+        constraints.gridwidth = 2
         add(submitButton, constraints)
 
         // Peti red (dugme za postavljanje)
@@ -81,6 +82,12 @@ class CreateExamView : JPanel() {
         constraints.gridy = 4
         constraints.gridwidth = 2
         add(postaviButton, constraints)
+
+        // Novi red za dugme povratka na meni
+        constraints.gridx = 0
+        constraints.gridy = 5
+        constraints.gridwidth = 2
+        add(backToMenuButton, constraints)
 
         // Postavljanje prilagođenog renderera za comboBox
         comboBoxSubjects.renderer = object : ListCellRenderer<Subject> {
@@ -112,7 +119,6 @@ class CreateExamView : JPanel() {
                     JOptionPane.ERROR_MESSAGE
                 )
             } else {
-                // Obavesti kontroler o akciji korisnika
                 listener?.onSubmitExam(selectedSubject, year, testName)
             }
         }
@@ -126,40 +132,15 @@ class CreateExamView : JPanel() {
                 JOptionPane.INFORMATION_MESSAGE
             )
         }
+
+        // Akcija na dugme "Vrati se na glavni menu"
+        backToMenuButton.addActionListener {
+            val parentPanel = this.parent as? JPanel
+            val cardLayout = parentPanel?.layout as? CardLayout
+            cardLayout?.show(parentPanel, "Menu")
+        }
     }
 
-    // Lažni API poziv koji simulira uspešan odgovor
-    private fun simulateApiCall() {
-        // Koristimo SwingWorker da simuliramo API poziv
-        object : SwingWorker<Void, Void>() {
-            override fun doInBackground(): Void? {
-                // Simulacija trajanja poziva
-                try {
-                    TimeUnit.SECONDS.sleep(2)
-                } catch (e: InterruptedException) {
-                    e.printStackTrace()
-                }
-                return null
-            }
-
-            override fun done() {
-                // Simuliramo odgovor "success"
-                val success = true
-                if (success) {
-                    postaviButton.isEnabled = true // Omogućavamo dugme "Postavi"
-                } else {
-                    JOptionPane.showMessageDialog(
-                        null,
-                        "Došlo je do greške prilikom postavljanja podataka.",
-                        "Greška",
-                        JOptionPane.ERROR_MESSAGE
-                    )
-                }
-            }
-        }.execute()
-    }
-
-    // Metod za ažuriranje ComboBox-a
     fun updateSubjects(subjects: List<Subject>) {
         comboBoxSubjects.removeAllItems()
         subjects.forEach { subject -> comboBoxSubjects.addItem(subject) }

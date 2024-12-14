@@ -1,6 +1,7 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
@@ -14,6 +15,10 @@ import java.util.concurrent.TimeUnit
 import javax.swing.*
 
 class CreateExamView : JPanel() {
+    var listener: ExamViewListener? = null
+
+    var onReturnToMenu: (() -> Unit)? = null // Callback za povratak na meni
+
     val comboBoxSubjects: JComboBox<Subject> = JComboBox()
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
@@ -95,34 +100,20 @@ class CreateExamView : JPanel() {
 
         // Akcija na dugme "Unesi"
         submitButton.addActionListener {
-            val selectedSubject = comboBoxSubjects.selectedItem as Subject?
+            val selectedSubject = comboBoxSubjects.selectedItem as? Subject
             val year = currentYearInput.text
-            val updatedYear = year.replace("/", "_")
             val testName = testNameInput.text
 
-            selectedSubject?.let {
+            if (selectedSubject == null || year.isBlank() || testName.isBlank()) {
                 JOptionPane.showMessageDialog(
                     null,
-                    "Uneti podaci:\nPredmet: ${it.name}\nGodina: $year\nNaziv provere: $testName",
-                    "Informacije",
-                    JOptionPane.INFORMATION_MESSAGE
-                )
-                val examService = ExamService()
-                try {
-                    examService.createExam(it.shortName, updatedYear, testName)
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-
-                // Simulacija poziva na API
-                simulateApiCall()
-            } ?: run {
-                JOptionPane.showMessageDialog(
-                    null,
-                    "Nije izabran nijedan predmet.",
+                    "Popunite sva polja.",
                     "Greška",
                     JOptionPane.ERROR_MESSAGE
                 )
+            } else {
+                // Obavesti kontroler o akciji korisnika
+                listener?.onSubmitExam(selectedSubject, year, testName)
             }
         }
 

@@ -1,6 +1,7 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
 import edu.raf.plugins.teacher.utils.ImageLoader
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit
 import javax.swing.*
 
 class CreateExamView : JPanel() {
-    val comboBoxSubjects: JComboBox<String> = JComboBox()
+    val comboBoxSubjects: JComboBox<Subject> = JComboBox()
     val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
     val currentYearLabel: JLabel = JLabel("Tekuća godina:")
@@ -76,28 +77,53 @@ class CreateExamView : JPanel() {
         constraints.gridwidth = 2
         add(postaviButton, constraints)
 
+        // Postavljanje prilagođenog renderera za comboBox
+        comboBoxSubjects.renderer = object : ListCellRenderer<Subject> {
+            private val renderer = DefaultListCellRenderer()
+            override fun getListCellRendererComponent(
+                list: JList<out Subject>?,
+                value: Subject?,
+                index: Int,
+                isSelected: Boolean,
+                cellHasFocus: Boolean
+            ): Component {
+                val component = renderer.getListCellRendererComponent(list, value?.name, index, isSelected, cellHasFocus)
+                (component as JLabel).toolTipText = value?.shortName
+                return component
+            }
+        }
+
         // Akcija na dugme "Unesi"
         submitButton.addActionListener {
-            val selectedSubject = comboBoxSubjects.selectedItem ?: "Nijedan predmet"
+            val selectedSubject = comboBoxSubjects.selectedItem as Subject?
             val year = currentYearInput.text
             val updatedYear = year.replace("/", "_")
             val testName = testNameInput.text
 
-            JOptionPane.showMessageDialog(
-                null,
-                "Uneti podaci:\nPredmet: $selectedSubject\nGodina: $year\nNaziv provere: $testName",
-                "Informacije",
-                JOptionPane.INFORMATION_MESSAGE
-            )
-            val examService = ExamService()
-            try {
-                examService.createExam("OOP", updatedYear, testName)
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
+            selectedSubject?.let {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Uneti podaci:\nPredmet: ${it.name}\nGodina: $year\nNaziv provere: $testName",
+                    "Informacije",
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+                val examService = ExamService()
+                try {
+                    examService.createExam(it.shortName, updatedYear, testName)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
 
-            // Simulacija poziva na API
-            simulateApiCall()
+                // Simulacija poziva na API
+                simulateApiCall()
+            } ?: run {
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Nije izabran nijedan predmet.",
+                    "Greška",
+                    JOptionPane.ERROR_MESSAGE
+                )
+            }
         }
 
         // Akcija na dugme "Postavi"
@@ -143,7 +169,7 @@ class CreateExamView : JPanel() {
     }
 
     // Metod za ažuriranje ComboBox-a
-    fun updateSubjects(subjects: List<String>) {
+    fun updateSubjects(subjects: List<Subject>) {
         comboBoxSubjects.removeAllItems()
         subjects.forEach { subject -> comboBoxSubjects.addItem(subject) }
     }

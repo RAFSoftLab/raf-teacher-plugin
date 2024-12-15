@@ -38,7 +38,11 @@ class CreateExamView : JPanel() {
     }
 
     // Novo dugme za povratak na glavni meni
-    val backToMenuButton: JButton = JButton("Vrati se na glavni menu")
+    val backToMenuButton: JButton = JButton("Vrati se na glavni menu").apply {
+        font = font.deriveFont(Font.ITALIC, 10f); // Italic font, veličina smanjena
+        preferredSize = Dimension(100, 25); // Dugme je manje (3 puta manja visina)
+    };
+
 
     init {
         layout = GridBagLayout()

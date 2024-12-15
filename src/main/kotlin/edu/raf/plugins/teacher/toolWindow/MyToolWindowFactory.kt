@@ -9,6 +9,7 @@ import edu.raf.plugins.teacher.controllers.SubjectController
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.CardLayout
+import java.awt.Image
 import java.net.URL
 import javax.swing.ImageIcon
 import javax.swing.JButton
@@ -26,10 +27,11 @@ class MyToolWindowFactory : ToolWindowFactory {
         val downloadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.DOWNLOAD_EXAM_IMAGE)))
 
         val createTestButton: JButton = JButton("Postavi proveru znanja").apply {
-            icon = createExamIcon
+            icon = ImageIcon(createExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
         }
+
         val downloadExamButton: JButton = JButton("Preuzmi proveru znanja").apply {
-            icon = downloadExamIcon
+            icon = ImageIcon(downloadExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
         }
 
 

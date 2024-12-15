@@ -18,30 +18,34 @@ class CreateExamView : JPanel() {
     var listener: ExamViewListener? = null
 
     // Komponente za View
-    val comboBoxSubjects: JComboBox<Subject> = JComboBox()
-    val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
+    private val comboBoxSubjects: JComboBox<Subject> = JComboBox()
+    private val labelChooseSubject: JLabel = JLabel("Izaberite predmet:")
 
-    val currentYearLabel: JLabel = JLabel("Tekuća godina:")
-    val currentYearInput: JTextField = JTextField(generateSchoolYear(LocalDate.now()), 7)
+    private val currentYearLabel: JLabel = JLabel("Tekuća godina:")
+    private val currentYearInput: JTextField = JTextField(generateSchoolYear(LocalDate.now()), 7)
 
-    val testNameLabel: JLabel = JLabel("Naziv provere znanja:")
-    val testNameInput: JTextField = JTextField(12).apply {
+    private val testNameLabel: JLabel = JLabel("Naziv provere znanja:")
+    private val testNameInput: JTextField = JTextField(12).apply {
         toolTipText = "Prvi kolokvijum"
         addHint("Prvi kolokvijum...")
     }
 
-    val submitButton: JButton = JButton("Unesi")
-    val iconContent = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
-    val postaviButton: JButton = JButton("Postavi").apply {
-        isEnabled = false
-        icon = iconContent
+    private val uploadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
+    private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
+
+    private val submitButton: JButton = JButton("Unesi").apply {
+        icon = ImageIcon(uploadExamIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
     }
 
+
+
     // Novo dugme za povratak na glavni meni
-    val backToMenuButton: JButton = JButton("Vrati se na glavni menu").apply {
-        font = font.deriveFont(Font.ITALIC, 10f); // Italic font, veličina smanjena
-        preferredSize = Dimension(100, 25); // Dugme je manje (3 puta manja visina)
-    };
+    private val backToMenuButton: JButton = JButton("Vrati se na glavni menu").apply {
+        font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+        preferredSize = Dimension(100, 30) // Manje dugme
+        val resizedIcon = ImageIcon(backIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+        icon = resizedIcon
+    }
 
 
     init {
@@ -85,7 +89,7 @@ class CreateExamView : JPanel() {
         constraints.gridx = 0
         constraints.gridy = 4
         constraints.gridwidth = 2
-        add(postaviButton, constraints)
+
 
         // Novi red za dugme povratka na meni
         constraints.gridx = 0
@@ -103,7 +107,8 @@ class CreateExamView : JPanel() {
                 isSelected: Boolean,
                 cellHasFocus: Boolean
             ): Component {
-                val component = renderer.getListCellRendererComponent(list, value?.name, index, isSelected, cellHasFocus)
+                val component =
+                    renderer.getListCellRendererComponent(list, value?.name, index, isSelected, cellHasFocus)
                 (component as JLabel).toolTipText = value?.shortName
                 return component
             }
@@ -127,15 +132,6 @@ class CreateExamView : JPanel() {
             }
         }
 
-        // Akcija na dugme "Postavi"
-        postaviButton.addActionListener {
-            JOptionPane.showMessageDialog(
-                null,
-                "Podaci su postavljeni.",
-                "Uspešno",
-                JOptionPane.INFORMATION_MESSAGE
-            )
-        }
 
         // Akcija na dugme "Vrati se na glavni menu"
         backToMenuButton.addActionListener {

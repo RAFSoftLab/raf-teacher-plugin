@@ -52,6 +52,8 @@ dependencies {
     // Dodate zavisnosti
     implementation("com.squareup.okhttp3:okhttp:4.11.0") // HTTP klijent
     implementation("org.json:json:20230227") // JSON parsiranje
+    implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") //JGit
+    implementation("ch.qos.logback:logback-classic:1.2.6")
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html

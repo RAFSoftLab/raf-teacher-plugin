@@ -56,7 +56,8 @@ class SubjectController(private val view: CreateExamView): ExamViewListener {
                     // Prikaz poruke nakon uspešnog unosa
                     JOptionPane.showMessageDialog(
                         null,
-                        "Provera je uspešno kreirana.",
+                        "Provera je uspešno kreirana.\n" +
+                                "Predmet: ${subject.name} \n Školska godina: $updatedYear \n Naziv: $testName",
                         "Uspeh",
                         JOptionPane.INFORMATION_MESSAGE
                     )

@@ -2,7 +2,6 @@ import com.jcraft.jsch.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
 public class GitInitPush {
 
@@ -10,7 +9,7 @@ public class GitInitPush {
         String serverUser = "mastersi";
         String serverIp = "192.168.124.28";
         String serverPassword = "masterSI2023";
-        String remoteGitPath = "/srv/git/OOP/2024_25/test7_zn";
+        String remoteGitPath = "/srv/git/OOP/2024_25/test9_zn";
         String localPath = "C:\\Users\\Zarko\\Documents\\MyFiles";
 
         try {
@@ -22,8 +21,8 @@ public class GitInitPush {
             session.connect();
             System.out.println("Povezan na server " + serverIp);
 
-            // 2. Inicijalizacija Git repozitorijuma na serveru
-            String initCommand = "echo '" + serverPassword + "' | sudo -S git init " + remoteGitPath;
+            // 2. Inicijalizacija bare Git repozitorijuma na serveru
+            String initCommand = "echo '" + serverPassword + "' | sudo -S git init --bare " + remoteGitPath;
             executeCommandOnServer(session, initCommand);
 
             // 3. Lokalna inicijalizacija i commit
@@ -51,8 +50,7 @@ public class GitInitPush {
             printProcessOutput(process);
             System.out.println("Dodavanje remote izlaz: " + exitCode);
 
-            // Postavljanje GIT_SSH_COMMAND za detaljan SSH log
-            processBuilder.command("cmd.exe", "/c", "set GIT_SSH_COMMAND=ssh -v && git push -u origin master");
+            processBuilder.command("cmd.exe", "/c", "git push -u origin master");
             process = processBuilder.start();
             exitCode = process.waitFor();
             printProcessOutput(process);

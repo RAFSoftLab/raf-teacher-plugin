@@ -8,7 +8,7 @@ import edu.raf.plugins.teacher.ui.CreateExamView
 import javax.swing.JOptionPane
 import javax.swing.SwingWorker
 
-class SubjectController(private val view: CreateExamView): ExamViewListener {
+class SubjectExamController(private val view: CreateExamView): ExamViewListener {
     init {
         view.listener = this //
     }
@@ -57,7 +57,7 @@ class SubjectController(private val view: CreateExamView): ExamViewListener {
                     JOptionPane.showMessageDialog(
                         null,
                         "Provera je uspešno kreirana.\n" +
-                                "Predmet: ${subject.name} \n Školska godina: $updatedYear \n Naziv: $testName",
+                                "Predmet: ${subject.name} \n Školska godina: $year \n Naziv: $testName",
                         "Uspeh",
                         JOptionPane.INFORMATION_MESSAGE
                     )

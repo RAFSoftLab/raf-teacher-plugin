@@ -1,8 +1,7 @@
 package edu.raf.plugins.teacher.utils
 
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.IOException
 
 
@@ -13,8 +12,6 @@ class ApiClient(private val baseUrl: String, private val token: String) {
     @Throws(IOException::class)
     fun getTmp(endpoint: String): String {
         // Kreiramo HTTP klijent
-
-
 
 
         val url = "http://192.168.124.28:8091/api/v1$endpoint"
@@ -58,5 +55,22 @@ class ApiClient(private val baseUrl: String, private val token: String) {
             println("Network error: ${e.message}")
             throw e
         }
+    }
+
+    @Throws(IOException::class)
+    fun post(endpoint: String, jsonBody: String): String {
+        val url = "$baseUrl$endpoint"
+        val body = RequestBody.create("application/json; charset=utf-8".toMediaTypeOrNull(), jsonBody)
+        val request = Request.Builder()
+            .url(url)
+            .post(body)
+            .header("Authorization", "Bearer $token")
+            .header("Content-Type", "application/json")
+            .build()
+        val response: Response = client.newCall(request).execute()
+        if (!response.isSuccessful) {
+            throw IOException("Neuspešan zahtev: ${response.code}")
+        }
+        return response.body?.string() ?: throw IOException("Prazan odgovor od servera.")
     }
 }

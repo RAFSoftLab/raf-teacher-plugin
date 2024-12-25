@@ -50,9 +50,4 @@ public class GitInitPush {
     }
 }
 
-class Config {
-    public static final String SERVER_USERNAME = "raf";
-    public static final String SERVER_PASSWORD = "masterSI2023";
-    public static final String HTTP_REPO_URL = "http://raf@192.168.124.28:/srv/git/OOP/2024_25/isp2";
-    public static final String SSH_REPO_URL = "mastersi@192.168.124.28:/srv/git/OOP/2024_25/isp2";
-}
+

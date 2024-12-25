@@ -17,6 +17,7 @@ public class GitInitPush {
         String remotePath = "http://raf@192.168.124.28:/srv/git/OOP/2024_25/isp2";
         String branchName = "main"; // ili grana koju želiš da koristiš
         String commitMessage = "Initial commit";
+        // Test
 
         try (Git git = Git.init().setDirectory(new File(localPath)).call()) {
             // Add all files to the repository

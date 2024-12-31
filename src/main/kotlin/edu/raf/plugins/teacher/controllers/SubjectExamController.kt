@@ -41,19 +41,30 @@ class SubjectExamController(private val view: CreateExamView): ExamViewListener 
 
     override fun onSubmitExam(subject: Subject, year: String, testName: String) {
         val updatedYear = year.replace("/", "_")
-        object : SwingWorker<Void, Void>() {
+        object : SwingWorker<Void, String>() {
+            private var errorMessage: String? = null
+
             override fun doInBackground(): Void? {
                 try {
                     examService.createExam(subject.shortName, updatedYear, testName)
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    errorMessage = "Došlo je do greške prilikom kreiranja provere: ${e.message}"
                 }
                 return null
             }
 
             override fun done() {
-                try {
-                    // Prikaz poruke nakon uspešnog unosa
+                if (errorMessage != null) {
+                    // Prikaz poruke o grešci
+                    JOptionPane.showMessageDialog(
+                        null,
+                        errorMessage,
+                        "Greška",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+                } else {
+                    // Prikaz poruke o uspehu
                     JOptionPane.showMessageDialog(
                         null,
                         "Provera je uspešno kreirana.\n" +
@@ -61,16 +72,9 @@ class SubjectExamController(private val view: CreateExamView): ExamViewListener 
                         "Uspeh",
                         JOptionPane.INFORMATION_MESSAGE
                     )
-                } catch (e: Exception) {
-                    JOptionPane.showMessageDialog(
-                        null,
-                        "Došlo je do greške prilikom kreiranja provere.",
-                        "Greška",
-                        JOptionPane.ERROR_MESSAGE
-                    )
                 }
             }
-
         }.execute()
     }
+
 }

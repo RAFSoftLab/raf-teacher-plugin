@@ -13,13 +13,14 @@ class ExamService {
     )
 
     @Throws(IOException::class)
-    fun createExam(subject: String, year: String, testType: String) {
+    fun createExam(subject: String, year: String, testType: String, group: String) {
         val endpoint = "/directories/create"
         val jsonBody = """
             {
                 "subject": "$subject",
                 "year": "$year",
-                "testType": "$testType"
+                "testType": "$testType",
+                "group": "$group"
             }
         """.trimIndent()
 
@@ -32,10 +33,12 @@ class ExamService {
     private fun parseAndPrintResponse(responseBody: String) {
         try {
             val jsonObject = JSONObject(responseBody)
-            val path = jsonObject.getString("path")
+            val fullPath = jsonObject.getString("fullPath")
+            val basePath = jsonObject.getString("basePath")
             val status = jsonObject.getString("status")
 
-            println("Path: $path")
+            println("Full Path: $fullPath")
+            println("Full Path: $basePath")
             println("Status: $status")
         } catch (e: Exception) {
             throw IOException("Greška pri parsiranju odgovora: ${e.message}", e)

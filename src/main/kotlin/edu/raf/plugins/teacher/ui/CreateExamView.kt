@@ -30,13 +30,16 @@ class CreateExamView : JPanel() {
         addHint("Prvi kolokvijum...")
     }
 
+    private val groupLabel: JLabel = JLabel("Grupa:")
+    private val groupInput: JTextField = JTextField(6)
+
+
     private val uploadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
     private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
 
     private val submitButton: JButton = JButton("Unesi").apply {
         icon = ImageIcon(uploadExamIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
     }
-
 
 
     // Novo dugme za povratak na glavni meni
@@ -79,33 +82,32 @@ class CreateExamView : JPanel() {
         constraints.gridx = 1
         add(testNameInput, constraints)
 
-        // Četvrti red (dugme za unos)
+        // Četvrti red (label + grupa)
         constraints.gridx = 0
         constraints.gridy = 3
-        constraints.gridwidth = 2
-        add(submitButton, constraints)
+        add(groupLabel, constraints)
 
-        // Peti red (dugme za postavljanje)
+        constraints.gridx = 1
+        add(groupInput, constraints)
+
+        // Peti red (dugme za unos)
         constraints.gridx = 0
         constraints.gridy = 4
         constraints.gridwidth = 2
+        add(submitButton, constraints)
 
-
-        // Novi red za dugme povratka na meni
+        // Šesti red (dugme za povratak na meni)
         constraints.gridx = 0
         constraints.gridy = 5
         constraints.gridwidth = 2
         add(backToMenuButton, constraints)
 
+
         // Postavljanje prilagođenog renderera za comboBox
         comboBoxSubjects.renderer = object : ListCellRenderer<Subject> {
             private val renderer = DefaultListCellRenderer()
             override fun getListCellRendererComponent(
-                list: JList<out Subject>?,
-                value: Subject?,
-                index: Int,
-                isSelected: Boolean,
-                cellHasFocus: Boolean
+                list: JList<out Subject>?, value: Subject?, index: Int, isSelected: Boolean, cellHasFocus: Boolean
             ): Component {
                 val component =
                     renderer.getListCellRendererComponent(list, value?.name, index, isSelected, cellHasFocus)
@@ -119,16 +121,14 @@ class CreateExamView : JPanel() {
             val selectedSubject = comboBoxSubjects.selectedItem as? Subject
             val year = currentYearInput.text
             val testName = testNameInput.text
+            val group = groupInput.text
 
             if (selectedSubject == null || year.isBlank() || testName.isBlank()) {
                 JOptionPane.showMessageDialog(
-                    null,
-                    "Popunite sva polja.",
-                    "Greška",
-                    JOptionPane.ERROR_MESSAGE
+                    null, "Popunite sva polja.", "Greška", JOptionPane.ERROR_MESSAGE
                 )
             } else {
-                listener?.onSubmitExam(selectedSubject, year, testName)
+                listener?.onSubmitExam(selectedSubject, year, testName, group)
             }
         }
 

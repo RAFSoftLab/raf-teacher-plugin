@@ -39,14 +39,14 @@ class SubjectExamController(private val view: CreateExamView): ExamViewListener 
         }.execute()
     }
 
-    override fun onSubmitExam(subject: Subject, year: String, testName: String) {
+    override fun onSubmitExam(subject: Subject, year: String, testName: String, group: String) {
         val updatedYear = year.replace("/", "_")
         object : SwingWorker<Void, String>() {
             private var errorMessage: String? = null
 
             override fun doInBackground(): Void? {
                 try {
-                    examService.createExam(subject.shortName, updatedYear, testName)
+                    examService.createExam(subject.shortName, updatedYear, testName, group)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     errorMessage = "Došlo je do greške prilikom kreiranja provere: ${e.message}"

@@ -1,5 +1,8 @@
 package edu.raf.plugins.teacher.controllers
 
+import GitRepoManager.cloneRepository
+import GitRepoManager.pushToRepository
+import RemoteScriptExecutor.runRemoteScript
 import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
@@ -8,7 +11,7 @@ import edu.raf.plugins.teacher.ui.CreateExamView
 import javax.swing.JOptionPane
 import javax.swing.SwingWorker
 
-class SubjectExamController(private val view: CreateExamView): ExamViewListener {
+class SubjectExamController(private val view: CreateExamView) : ExamViewListener {
     init {
         view.listener = this //
     }
@@ -46,13 +49,43 @@ class SubjectExamController(private val view: CreateExamView): ExamViewListener 
 
             override fun doInBackground(): Void? {
                 try {
-                    examService.createExam(subject.shortName, updatedYear, testName, group)
+                    val directoryResponse = examService.createDirectory(subject.shortName, updatedYear, testName, group)
+
+                    // Provera statusa i inicijalizacije
+                    if (directoryResponse.status != "success" || directoryResponse.gitInitialized != "true") {
+                        errorMessage =
+                            "Greška: Kreiranje direktorijuma nije uspelo. Status: ${directoryResponse.status}, Git inicijalizovan: ${directoryResponse.gitInitialized}."
+                        return null
+                    }
+
+                    // Skripta za permisije
+
+                    val resp = runRemoteScript(
+                        Config.SERVER_HOST,
+                        Config.SERVER_SSH_PORT,
+                        Config.SERVER_USERNAME,
+                        Config.SERVER_PASSWORD,
+                        Config.REMOTE_SCRIPT_1,
+                        directoryResponse.basePath
+                    )
+                    if (resp.contains("error") || resp.contains("password is required")) {
+                        errorMessage = "Greška: Skripta nije uspešno izvršena. Odgovor: $resp"
+                        return null
+                    }
+                    println("Skripta uspešno izvršena: $resp")
+
+                    val remoteURL = "http://${Config.SERVER_HOST}${directoryResponse.basePath.substring(8)}"
+                    println("Kreirani remote URL: $remoteURL")
+                    cloneRepository(remoteURL, "C:\\Users\\Zarko\\Documents\\zn_git")
+                    pushToRepository("C:\\Users\\Zarko\\Documents\\zn_git", "main", "test")
+
                 } catch (e: Exception) {
                     e.printStackTrace()
                     errorMessage = "Došlo je do greške prilikom kreiranja provere: ${e.message}"
                 }
                 return null
             }
+
 
             override fun done() {
                 if (errorMessage != null) {
@@ -65,6 +98,7 @@ class SubjectExamController(private val view: CreateExamView): ExamViewListener 
                     )
                 } else {
                     // Prikaz poruke o uspehu
+
                     JOptionPane.showMessageDialog(
                         null,
                         "Provera je uspešno kreirana.\n" +

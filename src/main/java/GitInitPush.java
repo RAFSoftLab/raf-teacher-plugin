@@ -35,7 +35,7 @@ public class GitInitPush {
             // Push to the repository
             PushCommand pushCommand = git.push();
             pushCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(
-                    Config.SERVER_USERNAME,
+                    Config.SERVER_GIT_USERNAME,
                     Config.SERVER_PASSWORD));
             pushCommand.call();
 

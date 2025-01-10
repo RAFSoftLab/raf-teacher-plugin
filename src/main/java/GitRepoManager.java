@@ -1,3 +1,7 @@
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -11,6 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Vector;
 
 public class GitRepoManager {
 
@@ -77,65 +83,137 @@ public class GitRepoManager {
         }
     }
 
-
     /**
-     * Downloads all Git repositories from a remote directory to a local directory.
+     * Downloads all student work from the server without using git.
      *
-     * @param remoteBaseURL The base HTTP URL of the remote directory containing Git repositories.
-     *                      Example: "http://192.100.100.10:/srv/git/Luka/2024_25/Prvi_ispit/Studentska_resenja"
-     * @param localBaseDir  The local directory where the repositories will be cloned.
-     *                      Example: "/path/to/local-dir"
-     * @throws Exception If an error occurs while retrieving or cloning repositories.
+     * @param examPath Path on server (e.g., "/Luka/2024_25/Prvi_ispit/15")
+     * @param localBaseDir Local directory where files will be downloaded
      */
-    public static void downloadAllRepos(String remoteBaseURL, String localBaseDir) throws Exception {
-        // Ensure the local directory exists
-        File localBaseDirFile = new File(localBaseDir);
-        if (!localBaseDirFile.exists() && !localBaseDirFile.mkdirs()) {
-            throw new Exception("Failed to create local directory: " + localBaseDir);
-        }
+    public static void downloadAllStudentWork(String examPath, String localBaseDir) {
+        try {
+            String host = Config.SERVER_HOST;
+            int port = 22;
+            String username = Config.SERVER_USERNAME;
+            String password = Config.SERVER_PASSWORD;
 
-        // Fetch the list of directories (repositories) from the remote server
-        URL url = new URL(remoteBaseURL + "/list-repos"); // Assumes server provides a repo listing
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
+            JSch jsch = new JSch();
+            Session session = jsch.getSession(username, host, port);
+            session.setPassword(password);
+            session.setConfig("StrictHostKeyChecking", "no");
+            session.connect();
 
-        if (connection.getResponseCode() == 200) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String repoName;
+            // SFTP Channel for file transfer
+            ChannelSftp sftpChannel = (ChannelSftp) session.openChannel("sftp");
+            sftpChannel.connect();
 
-            while ((repoName = reader.readLine()) != null) {
-                String repoURL = remoteBaseURL + "/" + repoName;
-                File localRepoDir = new File(localBaseDir, repoName);
+            String remotePath = "/srv/git" + examPath + "/Studentska_resenja";
 
-                // Clone each repository into the local directory
-                cloneRepository(repoURL, localRepoDir.getAbsolutePath());
+            // List all student directories
+            Vector<ChannelSftp.LsEntry> list = sftpChannel.ls(remotePath);
+            for (ChannelSftp.LsEntry entry : list) {
+                if (!entry.getAttrs().isDir() || entry.getFilename().equals(".") || entry.getFilename().equals("..")) {
+                    continue;
+                }
+
+                String studentDir = entry.getFilename();
+                String studentLocalPath = Paths.get(localBaseDir, studentDir).toString();
+                String studentRemotePath = remotePath + "/" + studentDir;
+
+                System.out.println("Downloading files for student: " + studentDir);
+
+                // Create local directory
+                new File(studentLocalPath).mkdirs();
+
+                // Download all files recursively
+                downloadDirectory(sftpChannel, studentRemotePath, studentLocalPath);
             }
-            reader.close();
 
-            System.out.println("All repositories downloaded successfully to: " + localBaseDir);
-        } else {
-            throw new Exception("Failed to fetch repository list. HTTP code: " + connection.getResponseCode());
+            sftpChannel.disconnect();
+            session.disconnect();
+
+            System.out.println("All student work downloaded to: " + localBaseDir);
+
+            // Create IntelliJ project structure
+            System.out.println("Creating IntelliJ project structure...");
+            createIntellijProject(localBaseDir);
+            System.out.println("IntelliJ project created. You can now open " + localBaseDir + " as a project in IntelliJ IDEA");
+
+        } catch (Exception e) {
+            System.err.println("Error downloading student work: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-//    /**
-//     * Clones a Git repository from a remote URL to a local directory.
-//     *
-//     * @param remoteRepoURL The HTTP URL of the remote Git repository.
-//     *                      Example: "http://192.168.124.28:/srv/git/Luka/2024_25/Prvi ispit/Studentska_resenja/student_1"
-//     * @param localDir      The path to the local directory where the repository will be cloned.
-//     *                      Example: "/path/to/local-repo"
-//     * @throws GitAPIException If a Git operation fails.
-//     */
-//    private static void cloneRepository(String remoteRepoURL, String localDir) throws GitAPIException {
-//        Git.cloneRepository()
-//                .setURI(remoteRepoURL)
-//                .setDirectory(new File(localDir))
-//                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(
-//                        Config.SERVER_USERNAME,
-//                        Config.SERVER_PASSWORD))
-//                .call();
-//
-//        System.out.println("Cloned repository: " + remoteRepoURL + " to " + localDir);
-//    }
+    private static void downloadDirectory(ChannelSftp sftpChannel, String sourceDir, String destDir)
+            throws SftpException {
+        Vector<ChannelSftp.LsEntry> list = sftpChannel.ls(sourceDir);
+        for (ChannelSftp.LsEntry entry : list) {
+            String filename = entry.getFilename();
+            if (filename.equals(".") || filename.equals("..")) {
+                continue;
+            }
+
+            String sourcePath = sourceDir + "/" + filename;
+            String destPath = Paths.get(destDir, filename).toString();
+
+            if (entry.getAttrs().isDir()) {
+                // Create directory and recurse
+                new File(destPath).mkdirs();
+                downloadDirectory(sftpChannel, sourcePath, destPath);
+            } else {
+                // Download file
+                new File(destPath).getParentFile().mkdirs();
+                sftpChannel.get(sourcePath, destPath);
+            }
+        }
+    }
+
+    public static void createIntellijProject(String baseDir) {
+        try {
+            // Create .idea directory
+            File ideaDir = new File(baseDir, ".idea");
+            ideaDir.mkdirs();
+
+            // Create modules.xml
+            String modulesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<project version=\"4\">\n" +
+                    "  <component name=\"ProjectModuleManager\">\n" +
+                    "    <modules>\n";
+
+            File[] studentDirs = new File(baseDir).listFiles(File::isDirectory);
+            for (File studentDir : studentDirs) {
+                String moduleName = studentDir.getName();
+                modulesXml += String.format("      <module fileurl=\"file://$PROJECT_DIR$/%s/%s.iml\" filepath=\"$PROJECT_DIR$/%s/%s.iml\" />\n",
+                        moduleName, moduleName, moduleName, moduleName);
+
+                // Create module .iml file
+                createModuleIml(studentDir);
+            }
+
+            modulesXml += "    </modules>\n" +
+                    "  </component>\n" +
+                    "</project>";
+
+            Files.write(new File(ideaDir, "modules.xml").toPath(), modulesXml.getBytes());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void createModuleIml(File moduleDir) throws IOException {
+        String iml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<module type=\"JAVA_MODULE\" version=\"4\">\n" +
+                "  <component name=\"NewModuleRootManager\" inherit-compiler-output=\"true\">\n" +
+                "    <exclude-output />\n" +
+                "    <content url=\"file://$MODULE_DIR$\">\n" +
+                "      <sourceFolder url=\"file://$MODULE_DIR$/src\" isTestSource=\"false\" />\n" +
+                "    </content>\n" +
+                "    <orderEntry type=\"inheritedJdk\" />\n" +
+                "    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\n" +
+                "  </component>\n" +
+                "</module>";
+
+        Files.write(new File(moduleDir, moduleDir.getName() + ".iml").toPath(), iml.getBytes());
+    }
 }

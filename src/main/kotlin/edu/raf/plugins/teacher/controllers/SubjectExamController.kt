@@ -46,13 +46,14 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
     override fun onSubmitExam(subject: Subject, year: String, testName: String, group: String) {
         val updatedYear = year.replace("/", "_")
+        val updatedTestName = testName.replace(" ", "_")
         view.showLoader(true)  // Prikazivanje loadera
         object : SwingWorker<Void, String>() {
             private var errorMessage: String? = null
 
             override fun doInBackground(): Void? {
                 try {
-                    val directoryResponse = examService.createDirectory(subject.shortName, updatedYear, testName, group)
+                    val directoryResponse = examService.createDirectory(subject.shortName, updatedYear, updatedTestName, group)
 
                     // Provera statusa i inicijalizacije
                     if (directoryResponse.status != "success" || directoryResponse.gitInitialized != "true") {

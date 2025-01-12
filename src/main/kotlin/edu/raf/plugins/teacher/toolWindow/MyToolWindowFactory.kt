@@ -58,7 +58,7 @@ class MyToolWindowFactory : ToolWindowFactory {
         }
 
         downloadExamButton.addActionListener {
-            // Ovdje možeš dodati logiku za "Preuzmi proveru znanja"
+            //Logika za "Preuzmi proveru znanja"
         }
 
         // Dodavanje glavnog panela u ToolWindow

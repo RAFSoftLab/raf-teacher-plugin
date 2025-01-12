@@ -46,6 +46,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
     override fun onSubmitExam(subject: Subject, year: String, testName: String, group: String) {
         val updatedYear = year.replace("/", "_")
+        view.showLoader(true)  // Prikazivanje loadera
         object : SwingWorker<Void, String>() {
             private var errorMessage: String? = null
 
@@ -91,6 +92,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
 
             override fun done() {
+                view.showLoader(false)  // Prikazivanje loadera
                 if (errorMessage != null) {
                     // Prikaz poruke o grešci
                     JOptionPane.showMessageDialog(

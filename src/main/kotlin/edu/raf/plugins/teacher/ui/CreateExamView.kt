@@ -50,6 +50,16 @@ class CreateExamView : JPanel() {
         icon = resizedIcon
     }
 
+    private val progressBar: JProgressBar = JProgressBar().apply {
+        isIndeterminate = true
+        preferredSize = Dimension(200, 20)
+        isVisible = false  // Početno je nevidljiv
+        foreground = Color(0xDBF7EE)  // Postavljanje boje napretka
+        background = Color(0xE1E1E1)  // Postavljanje svetlo sive boje za pozadinu
+    }
+
+
+
 
     init {
         layout = GridBagLayout()
@@ -96,11 +106,20 @@ class CreateExamView : JPanel() {
         constraints.gridwidth = 2
         add(submitButton, constraints)
 
+        // Progres bar
+        constraints.gridx = 0
+        constraints.gridy = 6
+        constraints.gridwidth = 2
+        add(progressBar, constraints)
+
+
         // Šesti red (dugme za povratak na meni)
         constraints.gridx = 0
         constraints.gridy = 5
         constraints.gridwidth = 2
         add(backToMenuButton, constraints)
+
+
 
 
         // Postavljanje prilagođenog renderera za comboBox
@@ -145,4 +164,9 @@ class CreateExamView : JPanel() {
         comboBoxSubjects.removeAllItems()
         subjects.forEach { subject -> comboBoxSubjects.addItem(subject) }
     }
+
+    fun showLoader(isVisible: Boolean) {
+        progressBar.isVisible = isVisible
+    }
+
 }

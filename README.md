@@ -1,6 +1,25 @@
 <!-- Plugin description -->
-
+Nastavnički Intellij plugin koji omogućava profesorima jednostavno upravljanje studentskim zadacima i rešenjima, olakšavajući kreiranje i preuzimanje ispitnih materijala, kao i organizovanje i praćenje studentskih odgovora
 <!-- Plugin description end -->
+
+## Profesor Plugin: Pokretanje projekta
+
+Sa desne strane izaberite pokretanje Gradle-a.
+![image](https://github.com/user-attachments/assets/840e7aae-79f8-482a-880f-a6731d805ed7)
+
+Nakon toga iz direktorijuma *Tasks/intellij platform* dva puta kliknite na *runIde*.
+
+<img src="https://github.com/user-attachments/assets/506c6a6a-45d8-4ee7-aa64-ca913ae61d65" alt="image" style="display: inline-block; width: 45%; margin-right: 20px; vertical-align: top;">
+<img src="https://github.com/user-attachments/assets/d15aa9d3-4117-450c-a12c-9aadcb3d98d4" alt="image" style="display: inline-block; width: 45%; vertical-align: top;">
+
+Prilikom sledećeg pokretanja, naći će na vrhu IDE-a ovakva opcija (budite sigurni da je Run Plugin izabran, ako nije ponovite prethodne korake).
+
+![image](https://github.com/user-attachments/assets/21a34333-38b6-403f-ab88-86dbf7a6457d)
+
+Napravite projekat i nastavinički plugin će biti dostupan za koriščenje.
+
+![image](https://github.com/user-attachments/assets/e935826b-4cf3-4277-887f-51f9d706f511)
+
 
 
 ## Profesor Plugin: Kreiranje i Postavljanje Zadataka

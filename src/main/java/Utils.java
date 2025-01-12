@@ -50,7 +50,7 @@ public class Utils {
                     System.out.println("Greška tokom rada sa direktorijumom: " + e.getMessage());
                 } finally {
                     // Brisanje tmp direktorijuma nakon push-a
-                    //deleteDirectory(tmpDir.toFile());
+                    deleteDirectory(tmpDir.toFile());
                 }
             } else {
                 System.out.println("Greška: Trenutni direktorijum je već tmp_git_clone.");
@@ -68,7 +68,7 @@ public class Utils {
     }
 
 
-    public static void copyProjectContents(Path sourcePath, Path targetPath) {
+    private static void copyProjectContents(Path sourcePath, Path targetPath) {
         try {
             Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>() {
 

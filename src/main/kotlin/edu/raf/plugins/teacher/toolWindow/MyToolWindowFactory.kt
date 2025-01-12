@@ -30,7 +30,7 @@ class MyToolWindowFactory : ToolWindowFactory {
             icon = ImageIcon(createExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
         }
 
-        val downloadExamButton: JButton = JButton("Preuzmi proveru znanja").apply {
+        val downloadExamButton: JButton = JButton("Preuzmi studentska rešenja").apply {
             icon = ImageIcon(downloadExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
         }
 

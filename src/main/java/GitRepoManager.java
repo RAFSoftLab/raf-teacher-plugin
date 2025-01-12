@@ -3,14 +3,19 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.file.*;
+
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
+
+import java.io.File;
+import java.nio.file.attribute.BasicFileAttributes;
+
+import static org.apache.commons.io.file.PathUtils.copyDirectory;
 
 public class GitRepoManager {
 
@@ -41,8 +46,8 @@ public class GitRepoManager {
     /**
      * Pushes changes to a remote repository
      *
-     * @param localPath The path to the local repository
-     * @param branchName The name of the branch to push
+     * @param localPath     The path to the local repository
+     * @param branchName    The name of the branch to push
      * @param commitMessage The commit message
      */
     public static void pushToRepository(String localPath, String branchName, String commitMessage) {
@@ -138,4 +143,8 @@ public class GitRepoManager {
 //
 //        System.out.println("Cloned repository: " + remoteRepoURL + " to " + localDir);
 //    }
+
+
+
+
 }

@@ -1,8 +1,9 @@
 package edu.raf.plugins.teacher.controllers
 
-import GitRepoManager.cloneRepository
-import GitRepoManager.pushToRepository
+import Config
+
 import RemoteScriptExecutor.runRemoteScript
+
 import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
@@ -10,6 +11,7 @@ import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
 import javax.swing.JOptionPane
 import javax.swing.SwingWorker
+
 
 class SubjectExamController(private val view: CreateExamView) : ExamViewListener {
     init {
@@ -76,8 +78,9 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
                     val remoteURL = "http://${Config.SERVER_HOST}${directoryResponse.basePath.substring(8)}"
                     println("Kreirani remote URL: $remoteURL")
-                    cloneRepository(remoteURL, "C:\\Users\\Zarko\\Documents\\zn_git")
-                    pushToRepository("C:\\Users\\Zarko\\Documents\\zn_git", "main", "test")
+
+
+                    Utils.pushCurrentProject(remoteURL, "main", "test")
 
                 } catch (e: Exception) {
                     e.printStackTrace()

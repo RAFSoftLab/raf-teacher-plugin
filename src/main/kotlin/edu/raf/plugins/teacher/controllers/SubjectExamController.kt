@@ -9,7 +9,9 @@ import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
+import java.awt.CardLayout
 import javax.swing.JOptionPane
+import javax.swing.JPanel
 import javax.swing.SwingWorker
 
 
@@ -22,6 +24,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
     private val examService = ExamService()
 
     fun loadSubjects() {
+        view.showLoader(true)  // Prikazivanje loadera
         object : SwingWorker<List<Subject>, Void>() {
             override fun doInBackground(): List<Subject> {
                 // Dugotrajna operacija
@@ -29,16 +32,25 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
             }
 
             override fun done() {
+                view.showLoader(false)  // Prikazivanje loadera
                 try {
+                    view.enableSubmitButton()
                     val subjects = get() // Rezultat poziva
                     view.updateSubjects(subjects)
                 } catch (e: Exception) {
                     JOptionPane.showMessageDialog(
                         null,
-                        "Nije moguće povezati se na server. Proverite Vašu mrežnu konekciju.",
+                        "Nije moguće povezati se na server. Proverite Vašu mrežnu i VPN konekciju.",
                         "Greška pri povezivanju",
                         JOptionPane.ERROR_MESSAGE
                     )
+
+                    // Povratak na glavnu stranicu (Menu)
+
+                    val parentPanel = view.parent as? JPanel
+                    val cardLayout = parentPanel?.layout as? CardLayout
+                    cardLayout?.show(parentPanel, "Menu")
+
                 }
             }
         }.execute()
@@ -53,7 +65,8 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
             override fun doInBackground(): Void? {
                 try {
-                    val directoryResponse = examService.createDirectory(subject.shortName, updatedYear, updatedTestName, group)
+                    val directoryResponse =
+                        examService.createDirectory(subject.shortName, updatedYear, updatedTestName, group)
 
                     // Provera statusa i inicijalizacije
                     if (directoryResponse.status != "success" || directoryResponse.gitInitialized != "true") {

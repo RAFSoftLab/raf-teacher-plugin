@@ -39,6 +39,7 @@ class CreateExamView : JPanel() {
 
     private val submitButton: JButton = JButton("Unesi").apply {
         icon = ImageIcon(uploadExamIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
+        isEnabled = false // Dugme je inicijalno onemogućeno
     }
 
 
@@ -157,6 +158,7 @@ class CreateExamView : JPanel() {
             val parentPanel = this.parent as? JPanel
             val cardLayout = parentPanel?.layout as? CardLayout
             cardLayout?.show(parentPanel, "Menu")
+
         }
     }
 
@@ -169,4 +171,11 @@ class CreateExamView : JPanel() {
         progressBar.isVisible = isVisible
     }
 
+    fun enableSubmitButton() {
+        submitButton.isEnabled = true
+    }
+
+    fun disableSubmitButton() {
+        submitButton.isEnabled = false
+    }
 }

@@ -5,6 +5,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.utils.ImageLoader
@@ -45,8 +46,8 @@ class MyToolWindowFactory : ToolWindowFactory {
         createTestButton.addActionListener {
             // Dinamičko kreiranje sadržaja za "Kreiraj proveru znanja"
             val createExamView = CreateExamView()
-            val controller = SubjectExamController(createExamView)
-            controller.loadSubjects()
+            val subjectExamController = SubjectExamController(createExamView)
+            subjectExamController.loadSubjects()
 
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
             if (mainPanel.components.none { it == createExamView }) {
@@ -59,6 +60,8 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         downloadExamButton.addActionListener {
             //Logika za "Preuzmi proveru znanja"
+            val studentSolutionsController = StudentSolutionsController()
+            studentSolutionsController.loadSubjectsOnServer()
         }
 
         // Dodavanje glavnog panela u ToolWindow

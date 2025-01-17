@@ -1,0 +1,20 @@
+package edu.raf.plugins.teacher.parsers
+
+import edu.raf.plugins.teacher.models.Subject
+import org.json.JSONArray
+
+class SubjectParser: ISubjectParser {
+    override fun parse(responseBody: String): List<Subject> {
+        val jsonArray = JSONArray(responseBody)
+        val subjects = mutableListOf<Subject>()
+
+        for (i in 0 until jsonArray.length()) {
+            val subjectObject = jsonArray.getJSONObject(i)
+            val name = subjectObject.getString("fullName")
+            val shortName = subjectObject.getString("shortName")
+            subjects.add(Subject(name, shortName))
+        }
+
+        return subjects
+    }
+}

@@ -2,12 +2,14 @@ package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.SubjectService
+import edu.raf.plugins.teacher.ui.CreateExamView
+import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import java.awt.CardLayout
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.SwingWorker
 
-class StudentSolutionsController {
+class StudentSolutionsController(private val view: GetStudentSolutionsView) {
     private val subjectService = SubjectService()
 
     fun loadSubjectsOnServer() {

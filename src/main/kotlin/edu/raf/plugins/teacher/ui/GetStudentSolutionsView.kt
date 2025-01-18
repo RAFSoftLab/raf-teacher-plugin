@@ -15,16 +15,37 @@ class GetStudentSolutionsView : JPanel() {
         "Korak 4: Izaberite grupu"
     )
 
+    private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 40, 40)
+    private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 40, 40)
+    private val examsIcon = ImageLoader.loadIcon(ConstantsUtil.EXAMS_IMAGE, 40, 40)
+    private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 40, 40)
+
+    private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
+    private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))
+
+
+
     private val progressBar = JProgressBar(0, steps.size - 1)
     private val stepLabel = JLabel("", JLabel.LEFT)
     private val stepIconLabel = JLabel()
-    private val nextButton = JButton("Sledeći korak")
-    private val prevButton = JButton("Prethodni korak")
+   // private val nextButton = JButton("Sledeći korak")
+  //  private val prevButton = JButton("Prethodni korak")
 
-    private val subjectsImage = loadIcon(ConstantsUtil.SUBJECTS_IMAGE)
-    private val calendarImage = loadIcon(ConstantsUtil.CALENDAR_IMAGE)
-    private val examsImage = loadIcon(ConstantsUtil.EXAMS_IMAGE)
-    private val groupsImage = loadIcon(ConstantsUtil.GROUPS_IMAGE)
+    private val prevButton: JButton = JButton("Prethodni korak").apply {
+        font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+        preferredSize = Dimension(100, 30) // Manje dugme
+        val resizedIcon = ImageIcon(prevIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+        icon = resizedIcon
+    }
+
+    private val nextButton: JButton = JButton("Sledeći korak").apply {
+        font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+        preferredSize = Dimension(100, 30) // Manje dugme
+        val resizedIcon = ImageIcon(nextIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+        icon = resizedIcon
+    }
+
+
 
     init {
         layout = BorderLayout()
@@ -84,10 +105,10 @@ class GetStudentSolutionsView : JPanel() {
 
         // Postavljanje odgovarajuće slike za trenutni korak
         stepIconLabel.icon = when (currentStep) {
-            0 -> subjectsImage
-            1 -> calendarImage
-            2 -> examsImage
-            3 -> groupsImage
+            0 -> subjectsIcon
+            1 -> calendarIcon
+            2 -> examsIcon
+            3 -> groupsIcon
             else -> null
         }
 
@@ -95,10 +116,5 @@ class GetStudentSolutionsView : JPanel() {
         nextButton.isEnabled = currentStep < steps.size - 1
     }
 
-    private fun loadIcon(imagePath: String): ImageIcon {
-        return ImageIcon(
-            ImageIcon(URL(ImageLoader.getImageUrl(imagePath)))
-                .image.getScaledInstance(40, 40, Image.SCALE_SMOOTH)
-        )
-    }
+
 }

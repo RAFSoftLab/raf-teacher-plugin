@@ -1,6 +1,9 @@
 package edu.raf.plugins.teacher.utils
 
 import java.util.*
+import javax.swing.ImageIcon
+import java.awt.Image
+import java.net.URL
 
 object ImageLoader {
     private val properties = Properties()
@@ -18,6 +21,10 @@ object ImageLoader {
         ?: throw IllegalArgumentException("Ključ za sliku '$key' nije pronađen!")
     }
 
-
-
+    fun loadIcon(imagePath: String, width: Int, height: Int): ImageIcon {
+        return ImageIcon(
+            ImageIcon(URL(getImageUrl(imagePath)))
+                .image.getScaledInstance(width, height, Image.SCALE_SMOOTH)
+        )
+    }
 }

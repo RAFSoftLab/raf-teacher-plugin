@@ -28,21 +28,23 @@ class GetStudentSolutionsView : JPanel() {
     private val progressBar = JProgressBar(0, steps.size - 1)
     private val stepLabel = JLabel("", JLabel.LEFT)
     private val stepIconLabel = JLabel()
-   // private val nextButton = JButton("Sledeći korak")
-  //  private val prevButton = JButton("Prethodni korak")
 
     private val prevButton: JButton = JButton("Prethodni korak").apply {
         font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
-        preferredSize = Dimension(100, 30) // Manje dugme
+        preferredSize = Dimension(120, 30) // Manje dugme
         val resizedIcon = ImageIcon(prevIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
         icon = resizedIcon
     }
 
     private val nextButton: JButton = JButton("Sledeći korak").apply {
         font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
-        preferredSize = Dimension(100, 30) // Manje dugme
+        preferredSize = Dimension(120, 30) // Manje dugme
+
         val resizedIcon = ImageIcon(nextIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
         icon = resizedIcon
+
+        horizontalTextPosition = SwingConstants.LEADING // Pozicionira tekst levo
+        verticalTextPosition = SwingConstants.CENTER // Pozicionira tekst vertikalno u centar
     }
 
 

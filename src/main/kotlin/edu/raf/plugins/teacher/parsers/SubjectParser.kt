@@ -3,7 +3,7 @@ package edu.raf.plugins.teacher.parsers
 import edu.raf.plugins.teacher.models.Subject
 import org.json.JSONArray
 
-class SubjectParser: ISubjectParser {
+class SubjectParser: IParser<Subject> {
     override fun parse(responseBody: String): List<Subject> {
         val jsonArray = JSONArray(responseBody)
         val subjects = mutableListOf<Subject>()

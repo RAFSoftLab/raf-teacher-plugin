@@ -15,10 +15,10 @@ class GetStudentSolutionsView : JPanel() {
         "Korak 4: Izaberite grupu"
     )
 
-    private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 40, 40)
-    private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 40, 40)
-    private val examsIcon = ImageLoader.loadIcon(ConstantsUtil.EXAMS_IMAGE, 40, 40)
-    private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 40, 40)
+    private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 30, 30)
+    private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 30, 30)
+    private val examsIcon = ImageLoader.loadIcon(ConstantsUtil.EXAMS_IMAGE, 30, 30)
+    private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 30, 30)
 
     private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
     private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))

@@ -57,23 +57,36 @@ class GetStudentSolutionsView : JPanel() {
         val mainPanel = JPanel()
         mainPanel.layout = BoxLayout(mainPanel, BoxLayout.Y_AXIS)
 
-        // Panel za sliku i tekst u istom redu
-        val stepPanel = JPanel(FlowLayout(FlowLayout.LEFT))
-        stepIconLabel.preferredSize = Dimension(40, 40)
-        stepLabel.font = Font(stepLabel.font.name, Font.PLAIN, 20)
-        stepPanel.add(stepIconLabel)
-        stepPanel.add(stepLabel)
+        // Panel za sliku, tekst i progress bar
+        val stepPanel = JPanel()
+        stepPanel.layout = BoxLayout(stepPanel, BoxLayout.Y_AXIS) // Vertikalni raspored
 
-        // Progress bar ispod slike i teksta, sada deblji
-        progressBar.preferredSize = Dimension(350, 30)  // Deblji progress bar
+        val iconTextPanel = JPanel()
+        iconTextPanel.layout = BoxLayout(iconTextPanel, BoxLayout.Y_AXIS) // Vertikalni raspored
+        iconTextPanel.alignmentX = Component.LEFT_ALIGNMENT
+
+        stepIconLabel.alignmentX = Component.LEFT_ALIGNMENT
+        stepLabel.alignmentX = Component.LEFT_ALIGNMENT
+        stepLabel.font = Font(stepLabel.font.name, Font.PLAIN, 20)
+
+        progressBar.preferredSize = Dimension(350, 10) // Manji progress bar
         progressBar.foreground = Color(0xDBF7EE)
+        progressBar.alignmentX = Component.LEFT_ALIGNMENT // Poravnavanje
+
+        // Dodavanje komponenti u iconTextPanel
+        iconTextPanel.add(stepIconLabel)
+        iconTextPanel.add(Box.createVerticalStrut(5)) // Razmak između ikonice i teksta
+        iconTextPanel.add(stepLabel)
+        iconTextPanel.add(Box.createVerticalStrut(5)) // Razmak između teksta i progress bara
+        iconTextPanel.add(progressBar)
+
+        // Dodavanje u glavni panel
+        stepPanel.add(iconTextPanel)
 
         mainPanel.add(stepPanel)
-        mainPanel.add(Box.createVerticalStrut(10))
-        mainPanel.add(progressBar)
-        mainPanel.add(Box.createVerticalStrut(20))  // Veći razmak između progress bara i dugmića
+        mainPanel.add(Box.createVerticalStrut(20)) // Razmak između progress bara i dugmića
 
-        // Dugmad za navigaciju, dodatno podignuta
+        // Dugmad za navigaciju
         val buttonPanel = JPanel(FlowLayout(FlowLayout.CENTER))
         buttonPanel.border = BorderFactory.createEmptyBorder(5, 0, 0, 0)
 
@@ -100,6 +113,8 @@ class GetStudentSolutionsView : JPanel() {
 
         updateView()
     }
+
+
 
     private fun updateView() {
         stepLabel.text = steps[currentStep]

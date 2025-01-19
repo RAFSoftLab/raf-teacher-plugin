@@ -84,6 +84,21 @@ class GetStudentSolutionsView : JPanel() {
         add(topPanel, BorderLayout.NORTH) // Pomera sve elemente bliže vrhu
         add(buttonPanel, BorderLayout.SOUTH)
 
+        prevButton.isEnabled = false
+        prevButton.addActionListener {
+            if (currentStep > 0) {
+                currentStep--
+                updateView()
+            }
+        }
+
+        nextButton.addActionListener {
+            if (currentStep < steps.size - 1) {
+                currentStep++
+                updateView()
+            }
+        }
+
         updateView()
     }
 

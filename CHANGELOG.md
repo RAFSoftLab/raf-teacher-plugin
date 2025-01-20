@@ -97,7 +97,7 @@
 
 - Fixed calculation of the plugin publication channel
 - Run Configurations - `Run Tests` uses the `RunAsTest` IDE feature
-- Replace the whole `IntelliJ Platform Plugin Template` with the new project name when running the GitHub Actions Cleanup workflow
+- Replace the whole `Nastavnički Plugin - RAF` with the new project name when running the GitHub Actions Cleanup workflow
 
 ### Removed
 

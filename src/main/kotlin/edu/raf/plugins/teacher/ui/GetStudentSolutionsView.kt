@@ -15,12 +15,19 @@ class GetStudentSolutionsView : JPanel() {
         "Korak 4: Izaberite grupu"
     )
 
+
+    //Ponudjeno korisnicima, cita se iz APIja
     private val options = arrayOf(
         arrayOf("OOP", "DSW", "TS", "Web Programming"),
         arrayOf("2022/23", "2023/24", "2024/25"),
         arrayOf("Prvi test", "Test", "Kolokvijum"),
         arrayOf("Grupa 1", "Grupa 2", "Grupa 3")
     )
+
+    // Opcija za konformaciju izabranih opcija
+
+    private val confirmedOptionsTitles = mapOf(0 to "Izabrani predmet:", 1 to "Izabrana godina:", 2 to "Izabrana provera znanja:", 3 to "Izabrana grupa:")
+
 
     private val selectedOptions = mutableMapOf<Int, String>()
     private val comboBox = JComboBox<String>()
@@ -31,7 +38,7 @@ class GetStudentSolutionsView : JPanel() {
     private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 30, 30)
 
     private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
-    private val uploadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
+    private val downloadSolutionIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.DOWNLOAD_IMAGE)))
 
     private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
     private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))
@@ -39,6 +46,7 @@ class GetStudentSolutionsView : JPanel() {
     private val progressBar = JProgressBar(0, steps.size - 1)
     private val stepLabel = JLabel("", JLabel.LEFT)
     private val stepIconLabel = JLabel()
+
 
     private val prevButton: JButton = JButton("Prethodni korak").apply {
         font = font.deriveFont(Font.ITALIC, 12f)
@@ -64,8 +72,8 @@ class GetStudentSolutionsView : JPanel() {
     }
 
 
-    private val submitButton: JButton = JButton("Unesi").apply {
-        icon = ImageIcon(uploadExamIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
+    private val submitButton: JButton = JButton("Preuzmi").apply {
+        icon = ImageIcon(downloadSolutionIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
         isVisible = false  // Na početku je sakriveno
     }
 
@@ -93,24 +101,26 @@ class GetStudentSolutionsView : JPanel() {
         topPanel.add(Box.createVerticalStrut(5))
         topPanel.add(progressBar)
 
+        // U init bloku, postavljamo razmake tako da sve bude centrirano i vizuelno uravnoteženo
         val centerPanel = JPanel()
         centerPanel.layout = GridBagLayout()
         val gbc = GridBagConstraints()
         gbc.fill = GridBagConstraints.HORIZONTAL
         gbc.gridx = 0
+        gbc.weightx = 1.0 // Centrirano, ali ne preko cele širine
+        gbc.insets = Insets(5, 20, 5, 20) // Dodati horizontalni razmaci sa strane
+
+// Dodavanje comboBox-a
         gbc.gridy = 0
-        gbc.weightx = 0.6  // 60% širine
-        gbc.insets = Insets(10, 0, 10, 0) // Opcioni razmaci
         centerPanel.add(comboBox, gbc)
 
-        // Dodavanje submitButton ispod comboBox-a
+// Dodavanje submitButton-a ispod comboBox-a sa malim razmakom
         gbc.gridy = 1
-        gbc.insets = Insets(5, 0, 10, 0) // Mali razmak između combobox-a i dugmeta
+        gbc.insets = Insets(10, 20, 10, 20) // Blagi razmak
         centerPanel.add(submitButton, gbc)
 
-
-        val buttonPanel = JPanel(GridLayout(2, 1, 0, 10)) // 2 reda, 1 kolona, 10px vertikalni razmak
-        buttonPanel.border = BorderFactory.createEmptyBorder(55, 0, 0, 0)
+        val buttonPanel = JPanel(GridLayout(2, 1, 0, 5)) // 2 reda, 1 kolona, 10px vertikalni razmak
+        buttonPanel.border = BorderFactory.createEmptyBorder(35, 0, 0, 0)
 
         val stepsButtonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 0)) // Razmak između prev i next
         stepsButtonPanel.add(prevButton)
@@ -146,7 +156,32 @@ class GetStudentSolutionsView : JPanel() {
             val parentPanel = this.parent as? JPanel
             val cardLayout = parentPanel?.layout as? CardLayout
             cardLayout?.show(parentPanel, "Menu")
+        }
 
+        submitButton.addActionListener {
+
+            //Zbog poslednje opcije
+            selectedOptions[currentStep] = comboBox.selectedItem as String
+
+            val selectedValues = steps.mapIndexed { index, step ->
+                "${confirmedOptionsTitles[index ]} ${selectedOptions[index]}"
+            }.joinToString("\n")
+
+            val confirmation = JOptionPane.showConfirmDialog(
+                this@GetStudentSolutionsView,
+                "Da li želite da preuzmete sledeće podatke?\n\n$selectedValues",
+                "Potvrda preuzimanja",
+                JOptionPane.YES_NO_OPTION
+            )
+
+            if (confirmation == JOptionPane.YES_OPTION) {
+                JOptionPane.showMessageDialog(
+                    this@GetStudentSolutionsView,
+                    "Uspešno preuzeto!",
+                    "Obaveštenje",
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
         }
 
         updateView()

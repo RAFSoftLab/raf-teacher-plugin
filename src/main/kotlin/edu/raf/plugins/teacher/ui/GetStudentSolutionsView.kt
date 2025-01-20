@@ -82,7 +82,7 @@ class GetStudentSolutionsView : JPanel() {
         gbc.fill = GridBagConstraints.HORIZONTAL
         gbc.gridx = 0
         gbc.gridy = 0
-        gbc.weightx = 0.1  // 60% širine
+        gbc.weightx = 0.6  // 60% širine
         gbc.insets = Insets(10, 0, 10, 0) // Opcioni razmaci
         centerPanel.add(comboBox, gbc)
 

@@ -30,6 +30,8 @@ class GetStudentSolutionsView : JPanel() {
     private val examsIcon = ImageLoader.loadIcon(ConstantsUtil.EXAMS_IMAGE, 30, 30)
     private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 30, 30)
 
+    private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
+
     private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
     private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))
 
@@ -51,6 +53,13 @@ class GetStudentSolutionsView : JPanel() {
         icon = resizedIcon
         horizontalTextPosition = SwingConstants.LEADING
         verticalTextPosition = SwingConstants.CENTER
+    }
+
+    private val backToMenuButton: JButton = JButton("Vrati se na glavni menu").apply {
+        font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+        preferredSize = Dimension(100, 30) // Manje dugme
+        val resizedIcon = ImageIcon(backIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+        icon = resizedIcon
     }
 
     init {
@@ -86,14 +95,20 @@ class GetStudentSolutionsView : JPanel() {
         gbc.insets = Insets(10, 0, 10, 0) // Opcioni razmaci
         centerPanel.add(comboBox, gbc)
 
-        val buttonPanel = JPanel(FlowLayout(FlowLayout.CENTER))
-        buttonPanel.border = BorderFactory.createEmptyBorder(25, 0, 0, 0)
-        buttonPanel.add(prevButton)
-        buttonPanel.add(nextButton)
+        val buttonPanel = JPanel(GridLayout(2, 1, 0, 10)) // 2 reda, 1 kolona, 10px vertikalni razmak
+        buttonPanel.border = BorderFactory.createEmptyBorder(55, 0, 0, 0)
+
+        val stepsButtonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 0)) // Razmak između prev i next
+        stepsButtonPanel.add(prevButton)
+        stepsButtonPanel.add(nextButton)
+
+        buttonPanel.add(stepsButtonPanel)
+        buttonPanel.add(backToMenuButton)
 
         add(topPanel, BorderLayout.NORTH)
         add(centerPanel, BorderLayout.CENTER)
         add(buttonPanel, BorderLayout.SOUTH)
+
 
         prevButton.isEnabled = false
         prevButton.addActionListener {
@@ -110,6 +125,14 @@ class GetStudentSolutionsView : JPanel() {
                 currentStep++
                 updateView()
             }
+        }
+
+        // Akcija na dugme "Vrati se na glavni menu"
+        backToMenuButton.addActionListener {
+            val parentPanel = this.parent as? JPanel
+            val cardLayout = parentPanel?.layout as? CardLayout
+            cardLayout?.show(parentPanel, "Menu")
+
         }
 
         updateView()

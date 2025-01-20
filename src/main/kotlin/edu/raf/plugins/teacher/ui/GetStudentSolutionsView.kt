@@ -26,11 +26,16 @@ class GetStudentSolutionsView : JPanel() {
 
     // Opcija za konformaciju izabranih opcija
 
-    private val confirmedOptionsTitles = mapOf(0 to "Izabrani predmet:", 1 to "Izabrana godina:", 2 to "Izabrana provera znanja:", 3 to "Izabrana grupa:")
+    private val confirmedOptionsTitles = mapOf(
+        0 to "Izabrani predmet:",
+        1 to "Izabrana godina:",
+        2 to "Izabrana provera znanja:",
+        3 to "Izabrana grupa:"
+    )
 
 
     private val selectedOptions = mutableMapOf<Int, String>()
-    private val comboBox = JComboBox<String>()
+    private val comboBoxOptions = JComboBox<String>()
 
     private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 30, 30)
     private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 30, 30)
@@ -43,7 +48,7 @@ class GetStudentSolutionsView : JPanel() {
     private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
     private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))
 
-    private val progressBar = JProgressBar(0, steps.size - 1)
+    private val stepBar = JProgressBar(0, steps.size - 1)
     private val stepLabel = JLabel("", JLabel.LEFT)
     private val stepIconLabel = JLabel()
 
@@ -75,6 +80,15 @@ class GetStudentSolutionsView : JPanel() {
     private val submitButton: JButton = JButton("Preuzmi").apply {
         icon = ImageIcon(downloadSolutionIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
         isVisible = false  // Na početku je sakriveno
+        isEnabled = false // Dugme je inicijalno onemogućeno
+    }
+
+    private val progressBar: JProgressBar = JProgressBar().apply {
+        isIndeterminate = true
+        preferredSize = Dimension(200, 20)
+        isVisible = false  // Početno je nevidljiv
+        foreground = Color(0xDBF7EE)  // Postavljanje boje napretka
+        background = Color(0xE1E1E1)  // Postavljanje svetlo sive boje za pozadinu
     }
 
 
@@ -94,12 +108,12 @@ class GetStudentSolutionsView : JPanel() {
         iconTextPanel.add(Box.createHorizontalStrut(10))
         iconTextPanel.add(stepLabel)
 
-        progressBar.preferredSize = Dimension(350, 15)
-        progressBar.foreground = Color(0xDBF7EE)
+        stepBar.preferredSize = Dimension(350, 15)
+        stepBar.foreground = Color(0xDBF7EE)
 
         topPanel.add(iconTextPanel)
         topPanel.add(Box.createVerticalStrut(5))
-        topPanel.add(progressBar)
+        topPanel.add(stepBar)
 
         // U init bloku, postavljamo razmake tako da sve bude centrirano i vizuelno uravnoteženo
         val centerPanel = JPanel()
@@ -112,12 +126,16 @@ class GetStudentSolutionsView : JPanel() {
 
 // Dodavanje comboBox-a
         gbc.gridy = 0
-        centerPanel.add(comboBox, gbc)
+        centerPanel.add(comboBoxOptions, gbc)
 
 // Dodavanje submitButton-a ispod comboBox-a sa malim razmakom
-        gbc.gridy = 1
+        gbc.gridy = 2
         gbc.insets = Insets(10, 20, 10, 20) // Blagi razmak
         centerPanel.add(submitButton, gbc)
+        // Dodavanje progress bara
+        gbc.gridy = 4
+        gbc.insets = Insets(10, 20, 10, 20) // Blagi razmak
+        centerPanel.add(progressBar, gbc)
 
         val buttonPanel = JPanel(GridLayout(2, 1, 0, 5)) // 2 reda, 1 kolona, 10px vertikalni razmak
         buttonPanel.border = BorderFactory.createEmptyBorder(35, 0, 0, 0)
@@ -137,7 +155,7 @@ class GetStudentSolutionsView : JPanel() {
         prevButton.isEnabled = false
         prevButton.addActionListener {
             if (currentStep > 0) {
-                selectedOptions[currentStep] = comboBox.selectedItem as String
+                selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
                 currentStep--
                 updateView()
             }
@@ -145,7 +163,7 @@ class GetStudentSolutionsView : JPanel() {
 
         nextButton.addActionListener {
             if (currentStep < steps.size - 1) {
-                selectedOptions[currentStep] = comboBox.selectedItem as String
+                selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
                 currentStep++
                 updateView()
             }
@@ -161,10 +179,10 @@ class GetStudentSolutionsView : JPanel() {
         submitButton.addActionListener {
 
             //Zbog poslednje opcije
-            selectedOptions[currentStep] = comboBox.selectedItem as String
+            selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
 
             val selectedValues = steps.mapIndexed { index, step ->
-                "${confirmedOptionsTitles[index ]} ${selectedOptions[index]}"
+                "${confirmedOptionsTitles[index]} ${selectedOptions[index]}"
             }.joinToString("\n")
 
             val confirmation = JOptionPane.showConfirmDialog(
@@ -190,7 +208,7 @@ class GetStudentSolutionsView : JPanel() {
     // Ažuriranje vidljivosti submit dugmeta u updateView()
     private fun updateView() {
         stepLabel.text = steps[currentStep]
-        progressBar.value = currentStep
+        stepBar.value = currentStep
 
         stepIconLabel.icon = when (currentStep) {
             0 -> subjectsIcon
@@ -200,14 +218,22 @@ class GetStudentSolutionsView : JPanel() {
             else -> null
         }
 
-        comboBox.removeAllItems()
-        options[currentStep].forEach { comboBox.addItem(it) }
-        comboBox.selectedItem = selectedOptions[currentStep] ?: options[currentStep][0]
+        comboBoxOptions.removeAllItems()
+        options[currentStep].forEach { comboBoxOptions.addItem(it) }
+        comboBoxOptions.selectedItem = selectedOptions[currentStep] ?: options[currentStep][0]
 
         prevButton.isEnabled = currentStep > 0
         nextButton.isEnabled = currentStep < steps.size - 1
 
         // Prikazuje submit dugme samo kada je poslednji korak
         submitButton.isVisible = currentStep == steps.size - 1
+    }
+
+    fun showLoader(isVisible: Boolean) {
+        progressBar.isVisible = isVisible
+    }
+
+    fun enableSubmitButton() {
+        submitButton.isEnabled = true
     }
 }

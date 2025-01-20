@@ -13,35 +13,39 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) {
     private val subjectService = SubjectService()
 
     fun loadSubjectsOnServer() {
+        view.showLoader(true)  // Prikazivanje loadera
         object : SwingWorker<List<Subject>, Void>() {
             override fun doInBackground(): List<Subject> {
                 // Dugotrajna operacija
-                return subjectService.getSubjectsOnServer() + subjectService.getYearsForSubjectOnServer("OOP")+subjectService.getExamsPerYearForSubjectOnServer("OOP","2024_25")
+                return subjectService.getSubjectsOnServer() + subjectService.getYearsForSubjectOnServer("OOP") + subjectService.getExamsPerYearForSubjectOnServer(
+                    "OOP",
+                    "2024_25"
+                )
             }
 
             override fun done() {
 
-//                view.showLoader(false)  // Prikazivanje loadera
-//                try {
-//                    view.enableSubmitButton()
-                val subjects = get() // Rezultat poziva
-                print(subjects)
-//                    view.updateSubjects(subjects)
-//                } catch (e: Exception) {
-//                    JOptionPane.showMessageDialog(
-//                        null,
-//                        "Nije moguće povezati se na server. Proverite Vašu mrežnu i VPN konekciju.",
-//                        "Greška pri povezivanju",
-//                        JOptionPane.ERROR_MESSAGE
-//                    )
-//
-//                    // Povratak na glavnu stranicu (Menu)
-//
-//                    val parentPanel = view.parent as? JPanel
-//                    val cardLayout = parentPanel?.layout as? CardLayout
-//                    cardLayout?.show(parentPanel, "Menu")
-//
-//                }
+                view.showLoader(false)  // Prikazivanje loadera
+                try {
+                    view.enableSubmitButton()
+                    val subjects = get() // Rezultat poziva
+                    print(subjects)
+                    // view.updateSubjects(subjects)
+                } catch (e: Exception) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Nije moguće povezati se na server. Proverite Vašu mrežnu i VPN konekciju.",
+                        "Greška pri povezivanju",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+
+                    // Povratak na glavnu stranicu (Menu)
+
+                    val parentPanel = view.parent as? JPanel
+                    val cardLayout = parentPanel?.layout as? CardLayout
+                    cardLayout?.show(parentPanel, "Menu")
+
+                }
             }
         }.execute()
     }

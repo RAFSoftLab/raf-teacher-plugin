@@ -31,6 +31,7 @@ class GetStudentSolutionsView : JPanel() {
     private val groupsIcon = ImageLoader.loadIcon(ConstantsUtil.GROUPS_IMAGE, 30, 30)
 
     private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
+    private val uploadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.UPLOAD_IMAGE)))
 
     private val prevIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.PREVIOUS_IMAGE)))
     private val nextIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.NEXT_IMAGE)))
@@ -61,6 +62,13 @@ class GetStudentSolutionsView : JPanel() {
         val resizedIcon = ImageIcon(backIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
         icon = resizedIcon
     }
+
+
+    private val submitButton: JButton = JButton("Unesi").apply {
+        icon = ImageIcon(uploadExamIcon.image.getScaledInstance(46, 46, Image.SCALE_SMOOTH)) // Smanjenje na 46x46
+        isVisible = false  // Na početku je sakriveno
+    }
+
 
     init {
         layout = BorderLayout()
@@ -94,6 +102,12 @@ class GetStudentSolutionsView : JPanel() {
         gbc.weightx = 0.6  // 60% širine
         gbc.insets = Insets(10, 0, 10, 0) // Opcioni razmaci
         centerPanel.add(comboBox, gbc)
+
+        // Dodavanje submitButton ispod comboBox-a
+        gbc.gridy = 1
+        gbc.insets = Insets(5, 0, 10, 0) // Mali razmak između combobox-a i dugmeta
+        centerPanel.add(submitButton, gbc)
+
 
         val buttonPanel = JPanel(GridLayout(2, 1, 0, 10)) // 2 reda, 1 kolona, 10px vertikalni razmak
         buttonPanel.border = BorderFactory.createEmptyBorder(55, 0, 0, 0)
@@ -138,6 +152,7 @@ class GetStudentSolutionsView : JPanel() {
         updateView()
     }
 
+    // Ažuriranje vidljivosti submit dugmeta u updateView()
     private fun updateView() {
         stepLabel.text = steps[currentStep]
         progressBar.value = currentStep
@@ -152,10 +167,12 @@ class GetStudentSolutionsView : JPanel() {
 
         comboBox.removeAllItems()
         options[currentStep].forEach { comboBox.addItem(it) }
-
         comboBox.selectedItem = selectedOptions[currentStep] ?: options[currentStep][0]
 
         prevButton.isEnabled = currentStep > 0
         nextButton.isEnabled = currentStep < steps.size - 1
+
+        // Prikazuje submit dugme samo kada je poslednji korak
+        submitButton.isVisible = currentStep == steps.size - 1
     }
 }

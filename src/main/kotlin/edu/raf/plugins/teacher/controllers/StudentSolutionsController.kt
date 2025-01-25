@@ -17,10 +17,8 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) {
         object : SwingWorker<List<Subject>, Void>() {
             override fun doInBackground(): List<Subject> {
                 // Dugotrajna operacija
-                return subjectService.getSubjectsOnServer() + subjectService.getYearsForSubjectOnServer("OOP") + subjectService.getExamsPerYearForSubjectOnServer(
-                    "OOP",
-                    "2024_25"
-                )
+                return subjectService.getSubjectsOnServer() + subjectService.getGroupsForExamPerYearForSubjectOnServer("OOP", "2024_25", "gif4")
+
             }
 
             override fun done() {

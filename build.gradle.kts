@@ -55,6 +55,8 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") //JGit
     implementation("ch.qos.logback:logback-classic:1.2.6") //Logovi
     implementation("com.jcraft:jsch:0.1.55") //JCraft
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") //JSON to Class serijalizacija
+
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html

@@ -30,7 +30,7 @@ class SubjectService {
         endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types(/.*)?")) -> JSONToStringListParser() as IParser<T>
 
         // Prepoznajemo specifičan endpoint "/professor/tests/subjects/{OOP}/years/{2024_25}/types/{gif4}/groups"
-        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types/[^/]+/groups")) -> StudentSolutionParser() as IParser<T> // Zameni sa stvarnim parserom
+        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types/[^/]+/groups")) -> StudentSolutionParser() as IParser<T> //
 
         // Default slučaj za neprepoznate endpoint-e
         else -> throw IllegalArgumentException("Nepoznat endpoint: $endpoint")
@@ -73,6 +73,21 @@ class SubjectService {
 
         return parseSubjects(responseBody, endpoint)
     }
+
+
+    @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
+    fun getGroupsForExamPerYearForSubjectOnServer(subjectName: String, year:String, examName: String): List<Subject> {
+
+        val endpoint = "/professor/tests/subjects/${subjectName}/years/${year}/types/${examName}/groups"
+
+        println(endpoint)
+
+        val responseBody = apiClient.get(endpoint)
+            ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
+
+        return parseSubjects(responseBody, endpoint)
+    }
+
 
 
 //    private fun parseSubjects(responseBody: String): List<Subject> {

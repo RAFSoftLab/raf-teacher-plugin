@@ -3,6 +3,7 @@ package edu.raf.plugins.teacher.ui
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
+import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.utils.ImageLoader
 import javax.swing.*
@@ -44,6 +45,7 @@ class GetStudentSolutionsView : JPanel() {
 
     private val selectedOptions = mutableMapOf<Int, String>() // Ono sto je korisnik izbarao
     private val comboBoxOptions = JComboBox<String>()
+    var selectedSolutions: List<StudentSolution> = listOf()
 
     private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 30, 30)
     private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 30, 30)

@@ -1,6 +1,7 @@
 package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
+import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
@@ -80,6 +81,27 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                     } else {
                         emptyList()
                     }
+                }
+
+                if (currentStep == 2) {
+                    print("Getuje se trenutna opcija 3")
+                    val selectedYear = view.getSelectedOption(1)
+                    val selectedSubject = view.getSelectedOption(0) // Ponovo dohvata subject za prvi korak
+                    val selectedExam = view.getSelectedOption(currentStep)
+                    println(selectedExam)
+
+                    return if (selectedSubject != null && selectedYear != null && selectedExam != null) {
+                       // val result = subjectService.getGroupsForExamPerYearForSubjectOnServer(selectedSubject, selectedYear, selectedExam)
+                        val result: List<StudentSolution> = subjectService.getGroupsForExamPerYearForSubjectOnServer(selectedSubject, selectedYear, selectedExam)
+                        view.selectedSolutions = result
+                        val groupNumbers = result.map { it.groupNumber }
+                        println("RSSLT")
+                        println(result)
+                        groupNumbers
+                    } else {
+                        emptyList() // Ako su neki parametri null, vraćaš praznu listu
+                    }
+
                 }
 
                 return emptyList()

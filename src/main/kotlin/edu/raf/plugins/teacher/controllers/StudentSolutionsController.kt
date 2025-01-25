@@ -1,5 +1,6 @@
 package edu.raf.plugins.teacher.controllers
 
+import edu.raf.plugins.teacher.listeners.StepNavigationListener
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
@@ -9,15 +10,19 @@ import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.SwingWorker
 
-class StudentSolutionsController(private val view: GetStudentSolutionsView) {
+class StudentSolutionsController(private val view: GetStudentSolutionsView) : StepNavigationListener {
+    init {
+        view.listener = this //
+    }
+
     private val subjectService = SubjectService()
 
     fun loadSubjectsOnServer() {
         view.showLoader(true)  // Prikazivanje loadera
-        object : SwingWorker<List<Subject>, Void>() {
-            override fun doInBackground(): List<Subject> {
+        object : SwingWorker<List<String>, Void>() {
+            override fun doInBackground(): List<String> {
                 // Dugotrajna operacija
-                return subjectService.getSubjectsOnServer() + subjectService.getGroupsForExamPerYearForSubjectOnServer("OOP", "2024_25", "gif4")
+                return subjectService.getSubjectsOnServer()
 
             }
 
@@ -26,8 +31,8 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) {
                 view.showLoader(false)  // Prikazivanje loadera
                 try {
                     view.enableSubmitButton()
-                    val subjects = get() // Rezultat poziva
-                    print(subjects)
+                    val subjectsOnServer = get() // Rezultat poziva
+                    view.updateOptions(subjectsOnServer)
                     // view.updateSubjects(subjects)
                 } catch (e: Exception) {
                     JOptionPane.showMessageDialog(
@@ -47,4 +52,52 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) {
             }
         }.execute()
     }
+
+    override fun onNextStep(currentStep: Int) {
+        println("Kurrent " + currentStep)
+
+
+        object : SwingWorker<List<String>, Void>() {
+            override fun doInBackground(): List<String> {
+                // Dugotrajna operacija
+                if (currentStep == 0) {
+                    print("Getuje se trenutna opcija")
+                    val selectedSubject = view.getSelectedOption(currentStep)
+                    println(selectedSubject)
+                    return selectedSubject?.let {
+                        subjectService.getYearsForSubjectOnServer(it)
+                    } ?: emptyList()
+                }
+                return emptyList()
+            }
+
+            override fun done() {
+
+
+                try {
+                    view.enableSubmitButton()
+                    val data = get() // Rezultat poziva
+                    println(data)
+                    view.updateOptions(data)
+                    // view.updateSubjects(subjects)
+                } catch (e: Exception) {
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Greška: ${e.message}.",
+                        "Greška na koraku ${currentStep+1}",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+
+                    // Povratak na glavnu stranicu (Menu)
+
+                    val parentPanel = view.parent as? JPanel
+                    val cardLayout = parentPanel?.layout as? CardLayout
+                    cardLayout?.show(parentPanel, "Menu")
+
+                }
+            }
+        }.execute()
+    }
+
+
 }

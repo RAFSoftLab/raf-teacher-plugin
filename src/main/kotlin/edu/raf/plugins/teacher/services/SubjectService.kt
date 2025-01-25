@@ -48,7 +48,7 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getSubjectsOnServer(): List<Subject> {
+    fun getSubjectsOnServer(): List<String> {
         val endpoint = "/professor/tests/subjects"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
@@ -57,7 +57,7 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getYearsForSubjectOnServer(subjectName: String): List<Subject> {
+    fun getYearsForSubjectOnServer(subjectName: String): List<String> {
         val endpoint = "/professor/tests/subjects/${subjectName}/years"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
@@ -66,7 +66,7 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getExamsPerYearForSubjectOnServer(subjectName: String, year:String): List<Subject> {
+    fun getExamsPerYearForSubjectOnServer(subjectName: String, year:String): List<String> {
         val endpoint = "/professor/tests/subjects/${subjectName}/years/${year}/types"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
@@ -76,11 +76,11 @@ class SubjectService {
 
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getGroupsForExamPerYearForSubjectOnServer(subjectName: String, year:String, examName: String): List<Subject> {
+    fun getGroupsForExamPerYearForSubjectOnServer(subjectName: String, year:String, examName: String): List<String> {
 
         val endpoint = "/professor/tests/subjects/${subjectName}/years/${year}/types/${examName}/groups"
 
-        println(endpoint)
+
 
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")

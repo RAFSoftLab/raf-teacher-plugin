@@ -1,12 +1,19 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.listeners.ExamViewListener
+import edu.raf.plugins.teacher.listeners.StepNavigationListener
+import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.utils.ImageLoader
 import javax.swing.*
 import java.awt.*
+import java.awt.event.ActionEvent
 import java.net.URL
 
 class GetStudentSolutionsView : JPanel() {
+
+    var listener: StepNavigationListener? = null
+
     private var currentStep = 0
     private val steps = arrayOf(
         "Korak 1: Izaberite predmet",
@@ -17,12 +24,13 @@ class GetStudentSolutionsView : JPanel() {
 
 
     //Ponudjeno korisnicima, cita se iz APIja
-    private val options = arrayOf(
-        arrayOf("OOP", "DSW", "TS", "Web Programming"),
-        arrayOf("2022/23", "2023/24", "2024/25"),
-        arrayOf("Prvi test", "Test", "Kolokvijum"),
-        arrayOf("Grupa 1", "Grupa 2", "Grupa 3")
-    )
+    // Inicijalno prazna varijabla options
+
+    //arrayOf( arrayOf("OOP", "DSW", "TS", "Web Programming"),
+    // arrayOf("2022/23", "2023/24", "2024/25"),
+    // arrayOf("Prvi test", "Test", "Kolokvijum"),
+    // arrayOf("Grupa 1", "Grupa 2", "Grupa 3") )
+    private var options: Array<Array<String>> = arrayOf()
 
     // Opcija za konformaciju izabranih opcija
 
@@ -175,8 +183,11 @@ class GetStudentSolutionsView : JPanel() {
         nextButton.addActionListener {
             if (currentStep < steps.size - 1) {
                 selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
+
+                print("Selektovane opcije" + selectedOptions)
                 currentStep++
-                updateView()
+                //  updateView()
+                listener?.onNextStep(currentStep - 1)
             }
         }
 
@@ -216,9 +227,8 @@ class GetStudentSolutionsView : JPanel() {
             }
         }
 
-        updateView()
-    }
 
+    }
 
 
     // Ažuriranje vidljivosti submit dugmeta u updateView()
@@ -252,4 +262,20 @@ class GetStudentSolutionsView : JPanel() {
     fun enableSubmitButton() {
         submitButton.isEnabled = true
     }
+
+    // Funkcija koja konvertuje listu stringova u niz nizova i dodeljuje vrednosti varijabli options
+    fun updateOptions(strings: List<String>) {
+        val newOptions = arrayOf(strings.toTypedArray())
+        options = if (options.isEmpty()) newOptions else options + newOptions
+        updateView()
+    }
+
+
+
+    // Getter metoda koja vraća vrednost na osnovu ključa
+    fun getSelectedOption(key: Int): String? {
+        return selectedOptions[key]
+    }
+
+
 }

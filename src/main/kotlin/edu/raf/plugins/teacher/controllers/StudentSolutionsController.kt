@@ -68,6 +68,20 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                         subjectService.getYearsForSubjectOnServer(it)
                     } ?: emptyList()
                 }
+
+                if (currentStep == 1) {
+                    print("Getuje se trenutna opcija 2")
+                    val selectedYear = view.getSelectedOption(currentStep)
+                    val selectedSubject = view.getSelectedOption(0) // Ponovo dohvata subject za prvi korak
+                    println(selectedYear)
+
+                    return if (selectedSubject != null && selectedYear != null) {
+                        subjectService.getExamsPerYearForSubjectOnServer(selectedSubject, selectedYear)
+                    } else {
+                        emptyList()
+                    }
+                }
+
                 return emptyList()
             }
 

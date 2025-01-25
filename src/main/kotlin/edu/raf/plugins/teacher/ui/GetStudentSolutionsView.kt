@@ -185,9 +185,10 @@ class GetStudentSolutionsView : JPanel() {
                 selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
 
                 print("Selektovane opcije" + selectedOptions)
+                listener?.onNextStep(currentStep)
                 currentStep++
                 //  updateView()
-                listener?.onNextStep(currentStep - 1)
+
             }
         }
 

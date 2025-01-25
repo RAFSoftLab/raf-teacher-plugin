@@ -20,7 +20,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
         view.listener = this //
     }
 
-    private val service = SubjectService()
+    private val subjectService = SubjectService()
     private val examService = ExamService()
 
     fun loadSubjects() {
@@ -28,7 +28,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
         object : SwingWorker<List<Subject>, Void>() {
             override fun doInBackground(): List<Subject> {
                 // Dugotrajna operacija
-                return service.getSubjects()
+                return subjectService.getSubjects()
             }
 
             override fun done() {

@@ -1,12 +1,15 @@
 package edu.raf.plugins.teacher.toolWindow
 
+import ai.grazie.detector.ngram.main
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
 import edu.raf.plugins.teacher.ui.CreateExamView
+import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.CardLayout
 import java.awt.Image
@@ -45,8 +48,8 @@ class MyToolWindowFactory : ToolWindowFactory {
         createTestButton.addActionListener {
             // Dinamičko kreiranje sadržaja za "Kreiraj proveru znanja"
             val createExamView = CreateExamView()
-            val controller = SubjectExamController(createExamView)
-            controller.loadSubjects()
+            val subjectExamController = SubjectExamController(createExamView)
+            subjectExamController.loadSubjects()
 
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
             if (mainPanel.components.none { it == createExamView }) {
@@ -59,6 +62,17 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         downloadExamButton.addActionListener {
             //Logika za "Preuzmi proveru znanja"
+            val getStudentsSolutionsView = GetStudentSolutionsView();
+            val studentSolutionsController = StudentSolutionsController(getStudentsSolutionsView)
+            studentSolutionsController.loadSubjectsOnServer()
+
+            // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
+            if (mainPanel.components.none { it == getStudentsSolutionsView }) {
+                mainPanel.add(getStudentsSolutionsView, "StudentSolutions")
+            }
+
+            // Prebacivanje na ekran za "Preuzmi proveru znanja"
+            cardLayout.show(mainPanel, "StudentSolutions")
         }
 
         // Dodavanje glavnog panela u ToolWindow

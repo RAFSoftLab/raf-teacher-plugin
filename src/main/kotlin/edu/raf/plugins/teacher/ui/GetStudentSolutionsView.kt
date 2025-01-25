@@ -34,7 +34,7 @@ class GetStudentSolutionsView : JPanel() {
     )
 
 
-    private val selectedOptions = mutableMapOf<Int, String>()
+    private val selectedOptions = mutableMapOf<Int, String>() // Ono sto je korisnik izbarao
     private val comboBoxOptions = JComboBox<String>()
 
     private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 30, 30)
@@ -115,42 +115,53 @@ class GetStudentSolutionsView : JPanel() {
         topPanel.add(Box.createVerticalStrut(5))
         topPanel.add(stepBar)
 
-        // U init bloku, postavljamo razmake tako da sve bude centrirano i vizuelno uravnoteženo
         val centerPanel = JPanel()
         centerPanel.layout = GridBagLayout()
         val gbc = GridBagConstraints()
         gbc.fill = GridBagConstraints.HORIZONTAL
         gbc.gridx = 0
-        gbc.weightx = 1.0 // Centrirano, ali ne preko cele širine
-        gbc.insets = Insets(5, 20, 5, 20) // Dodati horizontalni razmaci sa strane
+        gbc.weightx = 1.0
+        gbc.insets = Insets(5, 20, 5, 20)
 
-// Dodavanje comboBox-a
+        // Dodajemo prazan prostor na vrhu da bi comboBoxOptions bio bliže sredini
         gbc.gridy = 0
+        gbc.weighty = 0.5
+        centerPanel.add(Box.createVerticalGlue(), gbc)
+
+        // ComboBox pozicioniran bliže sredini
+        gbc.gridy = 1
+        gbc.weighty = 0.0
         centerPanel.add(comboBoxOptions, gbc)
 
-// Dodavanje submitButton-a ispod comboBox-a sa malim razmakom
         gbc.gridy = 2
-        gbc.insets = Insets(10, 20, 10, 20) // Blagi razmak
+        gbc.insets = Insets(10, 20, 10, 20)
         centerPanel.add(submitButton, gbc)
-        // Dodavanje progress bara
-        gbc.gridy = 4
-        gbc.insets = Insets(10, 20, 10, 20) // Blagi razmak
+
+        gbc.gridy = 3
         centerPanel.add(progressBar, gbc)
 
-        val buttonPanel = JPanel(GridLayout(2, 1, 0, 5)) // 2 reda, 1 kolona, 10px vertikalni razmak
-        buttonPanel.border = BorderFactory.createEmptyBorder(35, 0, 0, 0)
+        // Prazan prostor da gurne dugmad ka dnu
+        gbc.gridy = 4
+        gbc.weighty = 1.0
+        centerPanel.add(Box.createVerticalGlue(), gbc)
 
-        val stepsButtonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 0)) // Razmak između prev i next
+        // Dugmad za navigaciju
+        val stepsButtonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 0))
         stepsButtonPanel.add(prevButton)
         stepsButtonPanel.add(nextButton)
 
-        buttonPanel.add(stepsButtonPanel)
-        buttonPanel.add(backToMenuButton)
+        gbc.gridy = 5
+        gbc.weighty = 0.0
+        gbc.insets = Insets(20, 20, 10, 20)
+        centerPanel.add(stepsButtonPanel, gbc)
+
+        // Dugme "Nazad na meni" sa još više razmaka od stepsPanel-a
+        gbc.gridy = 6
+        gbc.insets = Insets(30, 20, 10, 20)
+        centerPanel.add(backToMenuButton, gbc)
 
         add(topPanel, BorderLayout.NORTH)
         add(centerPanel, BorderLayout.CENTER)
-        add(buttonPanel, BorderLayout.SOUTH)
-
 
         prevButton.isEnabled = false
         prevButton.addActionListener {
@@ -169,7 +180,6 @@ class GetStudentSolutionsView : JPanel() {
             }
         }
 
-        // Akcija na dugme "Vrati se na glavni menu"
         backToMenuButton.addActionListener {
             val parentPanel = this.parent as? JPanel
             val cardLayout = parentPanel?.layout as? CardLayout
@@ -177,20 +187,24 @@ class GetStudentSolutionsView : JPanel() {
         }
 
         submitButton.addActionListener {
-
-            //Zbog poslednje opcije
             selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
 
             val selectedValues = steps.mapIndexed { index, step ->
                 "${confirmedOptionsTitles[index]} ${selectedOptions[index]}"
             }.joinToString("\n")
 
-            val confirmation = JOptionPane.showConfirmDialog(
+            val options = arrayOf("Da", "Ne")
+            val confirmation = JOptionPane.showOptionDialog(
                 this@GetStudentSolutionsView,
-                "Da li želite da preuzmete sledeće podatke?\n\n$selectedValues",
+                "Da li želite da preuzmete sledeću proveru znanja?\n\n$selectedValues",
                 "Potvrda preuzimanja",
-                JOptionPane.YES_NO_OPTION
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[0]
             )
+
 
             if (confirmation == JOptionPane.YES_OPTION) {
                 JOptionPane.showMessageDialog(
@@ -204,6 +218,8 @@ class GetStudentSolutionsView : JPanel() {
 
         updateView()
     }
+
+
 
     // Ažuriranje vidljivosti submit dugmeta u updateView()
     private fun updateView() {

@@ -5,6 +5,7 @@ import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
+import edu.raf.plugins.teacher.ui.UIUtils.Companion.showToaster
 import java.awt.CardLayout
 import java.io.File
 import javax.swing.JOptionPane
@@ -137,16 +138,35 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
     }
 
     override fun onSubmit(studentSolution: StudentSolution, chosenPath: File) {
-        println("***IZBARANO*****")
-//        println(studentSolution)
-//        println(chosenPath)
+        println("***IZABRANO*****")
+
         val examPath = studentSolution.gitPath.substring(8)
         val localBaseDir = chosenPath.absolutePath
 
         println(examPath)
         println(localBaseDir)
-        GitRepoManager.downloadAllStudentWork(examPath, localBaseDir)
+
+        // Pokrećemo asinhroni zadatak
+        object : SwingWorker<Unit, Unit>() {
+            override fun doInBackground() {
+                view.showLoader(true) // Prikazujemo loader
+                GitRepoManager.downloadAllStudentWork(examPath, localBaseDir)
+                showToaster("Krenulo preuzimanje...")
+            }
+
+            override fun done() {
+                view.showLoader(false) // Sakrivamo loader kada se završi proces
+
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Uspešno preuzeto!",
+                    "Obaveštenje",
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
+        }.execute()
     }
+
 
 
 }

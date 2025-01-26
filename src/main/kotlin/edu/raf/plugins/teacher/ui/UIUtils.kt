@@ -1,10 +1,11 @@
 package edu.raf.plugins.teacher.ui
 
+import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Font
-import javax.swing.JTextField
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
+import javax.swing.*
 
 class UIUtils {
     companion object {
@@ -35,6 +36,23 @@ class UIUtils {
                     }
                 }
             })
+        }
+
+         fun showToaster(message: String) {
+            val dialog = JDialog()
+            dialog.isUndecorated = true
+            dialog.layout = BorderLayout()
+
+            val label = JLabel(message, SwingConstants.CENTER)
+            label.border = BorderFactory.createLineBorder(Color.BLACK, 1)
+            dialog.add(label, BorderLayout.CENTER)
+
+            dialog.pack()
+            dialog.setLocationRelativeTo(null) // Centriranje na ekran
+            dialog.isVisible = true
+
+            // Automatsko zatvaranje nakon 2 sekunde
+            Timer(10000) { dialog.dispose() }.start()
         }
     }
 }

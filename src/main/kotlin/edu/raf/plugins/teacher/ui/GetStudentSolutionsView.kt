@@ -241,12 +241,6 @@ class GetStudentSolutionsView : JPanel() {
 
 
 
-                JOptionPane.showMessageDialog(
-                    this@GetStudentSolutionsView,
-                    "Uspešno preuzeto!",
-                    "Obaveštenje",
-                    JOptionPane.INFORMATION_MESSAGE
-                )
             }
         }
 

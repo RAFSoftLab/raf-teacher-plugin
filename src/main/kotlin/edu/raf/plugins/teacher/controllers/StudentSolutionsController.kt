@@ -1,18 +1,17 @@
 package edu.raf.plugins.teacher.controllers
 
+
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
 import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
-import edu.raf.plugins.teacher.ui.UIUtils.Companion.showToaster
 import java.awt.CardLayout
 import java.io.File
-import javax.swing.JOptionPane
-import javax.swing.JPanel
-import javax.swing.SwingWorker
+import javax.swing.*
 
-class StudentSolutionsController(private val view: GetStudentSolutionsView) : StepNavigationListener, StudentSolutionsListener {
+class StudentSolutionsController(private val view: GetStudentSolutionsView) : StepNavigationListener,
+    StudentSolutionsListener {
     init {
         view.listenerStep = this //
         view.listenerSubmit = this
@@ -68,13 +67,17 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                     val selectedSubject = view.getSelectedOption(currentStep)
                     println(selectedSubject)
                     return selectedSubject?.let {
-                        subjectService.getYearsForSubjectOnServer(it)
+                        // Pp da getYearsForSubjectOnServer vraća listu godina u formatu '2023_24'
+                        val yearsList = subjectService.getYearsForSubjectOnServer(it)
+                        //  '_' sa '/' u svakoj godini
+                        yearsList.map { it.replace('_', '/') }
                     } ?: emptyList()
                 }
 
+
                 if (currentStep == 1) {
                     print("Getuje se trenutna opcija 2")
-                    val selectedYear = view.getSelectedOption(currentStep)
+                    val selectedYear = view.getSelectedOption(currentStep)?.replace('/', '_')
                     val selectedSubject = view.getSelectedOption(0) // Ponovo dohvata subject za prvi korak
                     println(selectedYear)
 
@@ -87,21 +90,25 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
 
                 if (currentStep == 2) {
                     print("Getuje se trenutna opcija 3")
-                    val selectedYear = view.getSelectedOption(1)
+                    val selectedYear = view.getSelectedOption(1)?.replace('/', '_')
                     val selectedSubject = view.getSelectedOption(0) // Ponovo dohvata subject za prvi korak
                     val selectedExam = view.getSelectedOption(currentStep)
                     println(selectedExam)
 
                     return if (selectedSubject != null && selectedYear != null && selectedExam != null) {
-                       // val result = subjectService.getGroupsForExamPerYearForSubjectOnServer(selectedSubject, selectedYear, selectedExam)
-                        val result: List<StudentSolution> = subjectService.getGroupsForExamPerYearForSubjectOnServer(selectedSubject, selectedYear, selectedExam)
+                        // val result = subjectService.getGroupsForExamPerYearForSubjectOnServer(selectedSubject, selectedYear, selectedExam)
+                        val result: List<StudentSolution> = subjectService.getGroupsForExamPerYearForSubjectOnServer(
+                            selectedSubject,
+                            selectedYear,
+                            selectedExam
+                        )
                         view.selectedSolutions = result
                         val groupNumbers = result.map { it.groupNumber }
                         println("RSSLT")
                         println(result)
                         groupNumbers
                     } else {
-                        emptyList() // Ako su neki parametri null, vraćaš praznu listu
+                        emptyList() // Ako su neki parametri null, vraća praznu listu
                     }
 
                 }
@@ -122,7 +129,7 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                     JOptionPane.showMessageDialog(
                         null,
                         "Greška: ${e.message}.",
-                        "Greška na koraku ${currentStep+1}",
+                        "Greška na koraku ${currentStep + 1}",
                         JOptionPane.ERROR_MESSAGE
                     )
 
@@ -146,27 +153,29 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
         println(examPath)
         println(localBaseDir)
 
-        // Pokrećemo asinhroni zadatak
+        // asinhroni zadatak
         object : SwingWorker<Unit, Unit>() {
             override fun doInBackground() {
+
                 view.showLoader(true) // Prikazujemo loader
                 GitRepoManager.downloadAllStudentWork(examPath, localBaseDir)
-                showToaster("Krenulo preuzimanje...")
             }
 
             override fun done() {
-                view.showLoader(false) // Sakrivamo loader kada se završi proces
+                SwingUtilities.invokeLater {
+                    view.showLoader(false) // Sakrivamo loader kada se završi proces
 
-                JOptionPane.showMessageDialog(
-                    null,
-                    "Uspešno preuzeto!",
-                    "Obaveštenje",
-                    JOptionPane.INFORMATION_MESSAGE
-                )
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Uspešno preuzeto!",
+                        "Obaveštenje",
+                        JOptionPane.INFORMATION_MESSAGE
+                    )
+                }
             }
         }.execute()
-    }
 
+    }
 
 
 }

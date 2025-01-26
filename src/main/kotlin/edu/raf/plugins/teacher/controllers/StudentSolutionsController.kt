@@ -1,19 +1,20 @@
 package edu.raf.plugins.teacher.controllers
 
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
+import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
-import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.SubjectService
-import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import java.awt.CardLayout
+import java.io.File
 import javax.swing.JOptionPane
 import javax.swing.JPanel
 import javax.swing.SwingWorker
 
-class StudentSolutionsController(private val view: GetStudentSolutionsView) : StepNavigationListener {
+class StudentSolutionsController(private val view: GetStudentSolutionsView) : StepNavigationListener, StudentSolutionsListener {
     init {
-        view.listener = this //
+        view.listenerStep = this //
+        view.listenerSubmit = this
     }
 
     private val subjectService = SubjectService()
@@ -133,6 +134,18 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                 }
             }
         }.execute()
+    }
+
+    override fun onSubmit(studentSolution: StudentSolution, chosenPath: File) {
+        println("***IZBARANO*****")
+//        println(studentSolution)
+//        println(chosenPath)
+        val examPath = studentSolution.gitPath.substring(8)
+        val localBaseDir = chosenPath.absolutePath
+
+        println(examPath)
+        println(localBaseDir)
+        GitRepoManager.downloadAllStudentWork(examPath, localBaseDir)
     }
 
 

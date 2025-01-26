@@ -1,19 +1,19 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
-import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
+import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
-import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.utils.ImageLoader
 import javax.swing.*
 import java.awt.*
-import java.awt.event.ActionEvent
 import java.net.URL
+import javax.swing.filechooser.FileSystemView
 
 class GetStudentSolutionsView : JPanel() {
 
-    var listener: StepNavigationListener? = null
+    var listenerStep: StepNavigationListener? = null
+    var listenerSubmit: StudentSolutionsListener? = null
 
     private var currentStep = 0
     private val steps = arrayOf(
@@ -192,7 +192,7 @@ class GetStudentSolutionsView : JPanel() {
                 selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
 
                 print("Selektovane opcije" + selectedOptions)
-                listener?.onNextStep(currentStep)
+                listenerStep?.onNextStep(currentStep)
                 currentStep++
                 //  updateView()
 
@@ -226,6 +226,21 @@ class GetStudentSolutionsView : JPanel() {
 
 
             if (confirmation == JOptionPane.YES_OPTION) {
+                val selectedSolution = selectedOptions[currentStep]?.let { getSelectedSolution(it) }
+
+
+
+                if (selectedSolution is StudentSolution) {
+                   //
+                    showFileChooseForStudentSolution(selectedSolution)
+                } else {
+                    JOptionPane.showMessageDialog(
+                        null, "Greška: Očekivan StudentSolution, dobijen ${selectedSolution?.javaClass?.simpleName}", "Greška", JOptionPane.ERROR_MESSAGE
+                    )
+                }
+
+
+
                 JOptionPane.showMessageDialog(
                     this@GetStudentSolutionsView,
                     "Uspešno preuzeto!",
@@ -279,10 +294,34 @@ class GetStudentSolutionsView : JPanel() {
     }
 
 
-
     // Getter metoda koja vraća vrednost na osnovu ključa
     fun getSelectedOption(key: Int): String? {
         return selectedOptions[key]
+    }
+
+    private fun getSelectedSolution(selectedGroupNumber: String): StudentSolution? {
+        return selectedSolutions.find { it.groupNumber == selectedGroupNumber }
+    }
+
+    fun showFileChooseForStudentSolution(studentSolution: StudentSolution) {
+        val fileChooser = JFileChooser(FileSystemView.getFileSystemView())
+        fileChooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        fileChooser.dialogTitle = "Izaberi direktorijum za preuzimanje"
+
+        val userSelection = fileChooser.showOpenDialog(null)
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            val selectedDirectory = fileChooser.selectedFile
+            println("Izabran direktorijum: ${selectedDirectory.absolutePath}")
+            listenerSubmit?.onSubmit(studentSolution, selectedDirectory)
+
+        } else {
+
+
+            JOptionPane.showMessageDialog(
+                null, "Nema izabranog direktorijuma.", "Greška", JOptionPane.ERROR_MESSAGE
+            )
+        }
     }
 
 

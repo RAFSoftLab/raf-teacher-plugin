@@ -45,7 +45,8 @@ class GetStudentSolutionsView : JPanel() {
 
     private val selectedOptions = mutableMapOf<Int, String>() // Ono sto je korisnik izbarao
     private val comboBoxOptions = JComboBox<String>()
-    var selectedSolutions: List<StudentSolution> = listOf()
+
+    var selectedSolutions: List<StudentSolution> = listOf()// Ono sto se dobija kao response APIja u zadnjem koraku
 
     private val subjectsIcon = ImageLoader.loadIcon(ConstantsUtil.SUBJECTS_IMAGE, 30, 30)
     private val calendarIcon = ImageLoader.loadIcon(ConstantsUtil.CALENDAR_IMAGE, 30, 30)
@@ -177,6 +178,10 @@ class GetStudentSolutionsView : JPanel() {
         prevButton.addActionListener {
             if (currentStep > 0) {
                 selectedOptions[currentStep] = comboBoxOptions.selectedItem as String
+                options = options.dropLast(1).toTypedArray()
+                println("OPTIONS--->")
+                println(options)
+                //sele.remove(2) // Uklanja unos sa ključem 2
                 currentStep--
                 updateView()
             }

@@ -5,6 +5,7 @@ import org.json.JSONArray
 
 class SubjectParser: IParser<Subject> {
     override fun parse(responseBody: String): List<Subject> {
+        print("Subject srv parser")
         val jsonArray = JSONArray(responseBody)
         val subjects = mutableListOf<Subject>()
 

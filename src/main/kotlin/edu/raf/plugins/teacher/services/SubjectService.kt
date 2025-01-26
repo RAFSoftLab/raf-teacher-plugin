@@ -1,5 +1,6 @@
 package edu.raf.plugins.teacher.services
 
+import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.parsers.IParser
 import edu.raf.plugins.teacher.parsers.JSONToStringListParser
@@ -17,22 +18,30 @@ class SubjectService {
     )
 
     private fun <T> getParser(endpoint: String): IParser<T> = when {
-        // Prepoznajemo statički endpoint "/subjects"
-        endpoint == "/subjects" -> SubjectParser() as IParser<T>
+        endpoint == "/subjects" -> {
+            println("Endpoint je /subjects")
+            SubjectParser() as IParser<T>
+        }
+        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types/[^/]+/groups")) -> {
+            println("Endpoint je za grupe - StudentSolutionParser")
+            StudentSolutionParser() as IParser<T>
+        }
 
-        // Prepoznajemo endpoint "/professor/tests/subjects" i sve njegove podputanje
-        endpoint.matches(Regex("/professor/tests/subjects(/.*)?")) -> JSONToStringListParser() as IParser<T>
+        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types(/.*)?")) -> {
+            println("Endpoint je za vrste testova")
+            JSONToStringListParser() as IParser<T>
+        }
+        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years(/.*)?")) -> {
+            println("Endpoint je za godine")
+            JSONToStringListParser() as IParser<T>
+        }
 
-        // Prepoznajemo endpoint sa dinamičkim delovima za "/professor/tests/subjects/{OOP}/years"
-        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years(/.*)?")) -> JSONToStringListParser() as IParser<T>
+        endpoint.matches(Regex("/professor/tests/subjects(/.*)?")) -> {
+            println("Endpoint je /professor/tests/subjects")
+            JSONToStringListParser() as IParser<T>
+        }
 
-        // Prepoznajemo endpoint sa još dubljim dinamičkim delovima
-        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types(/.*)?")) -> JSONToStringListParser() as IParser<T>
 
-        // Prepoznajemo specifičan endpoint "/professor/tests/subjects/{OOP}/years/{2024_25}/types/{gif4}/groups"
-        endpoint.matches(Regex("/professor/tests/subjects/[^/]+/years/[^/]+/types/[^/]+/groups")) -> StudentSolutionParser() as IParser<T> // Zameni sa stvarnim parserom
-
-        // Default slučaj za neprepoznate endpoint-e
         else -> throw IllegalArgumentException("Nepoznat endpoint: $endpoint")
     }
 
@@ -48,7 +57,7 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getSubjectsOnServer(): List<Subject> {
+    fun getSubjectsOnServer(): List<String> {
         val endpoint = "/professor/tests/subjects"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
@@ -57,7 +66,7 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getYearsForSubjectOnServer(subjectName: String): List<Subject> {
+    fun getYearsForSubjectOnServer(subjectName: String): List<String> {
         val endpoint = "/professor/tests/subjects/${subjectName}/years"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
@@ -66,13 +75,29 @@ class SubjectService {
     }
 
     @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
-    fun getExamsPerYearForSubjectOnServer(subjectName: String, year:String): List<Subject> {
+    fun getExamsPerYearForSubjectOnServer(subjectName: String, year:String): List<String> {
         val endpoint = "/professor/tests/subjects/${subjectName}/years/${year}/types"
         val responseBody = apiClient.get(endpoint)
             ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
 
         return parseSubjects(responseBody, endpoint)
     }
+
+
+    @Throws(IOException::class) // Naglašava da metoda može baciti izuzetak
+    fun getGroupsForExamPerYearForSubjectOnServer(subjectName: String, year:String, examName: String): List<StudentSolution> {
+
+        val endpoint = "/professor/tests/subjects/${subjectName}/years/${year}/types/${examName}/groups"
+
+
+
+        val responseBody = apiClient.get(endpoint)
+            ?: throw IOException("Nije moguće dobiti odgovor sa servera.")
+
+
+        return parseSubjects(responseBody, endpoint)
+    }
+
 
 
 //    private fun parseSubjects(responseBody: String): List<Subject> {

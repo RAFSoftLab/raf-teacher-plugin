@@ -8,7 +8,7 @@ Nastavnički Intellij plugin koji omogućava profesorima jednostavno upravljanje
 - Otvoreni fajl sačuvajte kao `Config.java` (preimenujte)
 ***
 - Otvorite Fajl `src/main/resources/config.example.properties`
-- Zamenite `api.url` i `example_token` stvarnim vrednostima
+- Zamenite `api.url` i `api.token` stvarnim vrednostima
 - Otvoreni fajl sačuvajte kao `config.properties` (preimenujte)
 
 ## Nastavnički Plugin: Pokretanje projekta (aplikacije)

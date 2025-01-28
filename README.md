@@ -2,7 +2,16 @@
 Nastavnički Intellij plugin koji omogućava profesorima jednostavno upravljanje studentskim zadacima i rešenjima, olakšavajući kreiranje i preuzimanje ispitnih materijala, kao i organizovanje i praćenje studentskih odgovora
 <!-- Plugin description end -->
 
-## Profesor Plugin: Pokretanje projekta
+## Konfiguracija (postupak pre pokretanja aplikacija)
+- Otvorite Fajl `src/main/java/ConfigExample.java`
+- Zamenite `example_git_username`, `example_server_username`, itd. stvarnim vrednostima
+- Otvoreni fajl sačuvajte kao `Config.java` (preimenujte)
+***
+- Otvorite Fajl `src/main/resources/config.example.properties`
+- Zamenite `api.url` i `example_token` stvarnim vrednostima
+- Otvoreni fajl sačuvajte kao `config.properties` (preimenujte)
+
+## Nastavnički Plugin: Pokretanje projekta (aplikacije)
 
 Sa desne strane izaberite pokretanje Gradle-a.
 ![image](https://github.com/user-attachments/assets/840e7aae-79f8-482a-880f-a6731d805ed7)

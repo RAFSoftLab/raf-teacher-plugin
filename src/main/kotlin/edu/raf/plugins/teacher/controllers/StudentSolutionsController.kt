@@ -6,6 +6,7 @@ import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
+import edu.raf.plugins.teacher.utils.Utils.Companion.openDownloadedProject;
 import java.awt.CardLayout
 import java.io.File
 import javax.swing.*
@@ -171,6 +172,8 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                         "Obaveštenje",
                         JOptionPane.INFORMATION_MESSAGE
                     )
+
+                    openDownloadedProject(localBaseDir)
                 }
             }
         }.execute()

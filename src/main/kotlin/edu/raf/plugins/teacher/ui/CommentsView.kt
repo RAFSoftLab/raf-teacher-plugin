@@ -3,11 +3,15 @@ package edu.raf.plugins.teacher.ui
 import edu.raf.plugins.teacher.models.Comment
 import java.awt.*
 import javax.swing.*
-import javax.swing.border.EmptyBorder
+import javax.swing.border.*
 
 class CommentsView : JPanel() {
     private val vBox = Box(BoxLayout.Y_AXIS)
     private val expandedComments = mutableSetOf<Long>()
+    private val commentBorder = CompoundBorder(
+        MatteBorder(0, 0, 1, 0, Color(0xEEEEEE)), // Donja ivica
+        EmptyBorder(5, 5, 5, 5) // Padding
+    )
 
     init {
         layout = BorderLayout()
@@ -24,6 +28,7 @@ class CommentsView : JPanel() {
             val hBox = JPanel(BorderLayout()).apply {
                 preferredSize = Dimension(380, 30)
                 maximumSize = Dimension(380, if (expandedComments.contains(comment.id)) 500 else 30)
+                border = commentBorder // Postavljamo border
 
                 // Kreiranje komponenti
                 val dashLabel = JLabel("- ").apply {
@@ -32,7 +37,7 @@ class CommentsView : JPanel() {
 
                 val fileNameLabel = JLabel(comment.relativePath).apply {
                     font = font.deriveFont(Font.BOLD)
-                    foreground =  Color(0xFFB4B4)//#FFB4B4
+                    foreground = Color(0xFFB4B4)
                 }
 
                 val lineNumbersLabel = JLabel(" (${comment.startLine}-${comment.endLine}): ").apply {
@@ -57,7 +62,7 @@ class CommentsView : JPanel() {
 
                 // Panel za tačkice (desna strana)
                 val dotsPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
-                    if (comment.commentText.length > 50) {
+                    if (comment.commentText.length > 35) {
                         val dotsButton = JButton("...").apply {
                             font = font.deriveFont(Font.BOLD)
                             foreground = Color.GRAY

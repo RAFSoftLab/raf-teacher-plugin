@@ -1,8 +1,14 @@
-<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>org.jetbrains.plugins.template</id>
     <name>Nastavnički Plugin - RAF</name>
     <vendor>JetBrains</vendor>
+
+
+    <version>1.0</version>
+    <description>Opis plugin-a</description>
+
+    <!-- Icon ide ovde, na vrhu -->
+    <idea-version since-build="193"/>
 
     <depends>com.intellij.modules.platform</depends>
 

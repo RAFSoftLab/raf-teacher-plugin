@@ -25,7 +25,7 @@ data class Comment(
 
     // Skraćeni komentar (prvih 20 karaktera)
     val shortComment: String
-        get() = if (commentText.length <= 50) commentText
-        else commentText.substring(0, 50) + "..."
+        get() = if (commentText.length <= 35) commentText
+        else commentText.substring(0, 35) + "..."
 
 }

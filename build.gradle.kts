@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25" // Ažurirana verzija
 }
 
 group = providers.gradleProperty("pluginGroup").get()
@@ -55,7 +56,7 @@ dependencies {
     implementation("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") //JGit
     implementation("ch.qos.logback:logback-classic:1.2.6") //Logovi
     implementation("com.jcraft:jsch:0.1.55") //JCraft
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") //JSON to Class serijalizacija
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") // Ažurirana verzija JSON to Class serijalizacija
 
 }
 

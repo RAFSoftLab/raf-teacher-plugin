@@ -6,6 +6,7 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.content.ContentFactory
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.controllers.CommentsController
 import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
 import edu.raf.plugins.teacher.ui.CommentsView
@@ -84,8 +85,9 @@ class MyToolWindowFactory : ToolWindowFactory {
 
         commentsSectionButton.addActionListener {
             // Logika za "Komentari"
-           val commentsView = CommentsView();
-
+            val commentsView = CommentsView()
+            val commentsController = CommentsController(commentsView)
+            commentsController.loadAndDisplayComments()
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
             if (mainPanel.components.none { it == commentsView }) {
                 mainPanel.add(commentsView, "Comments")

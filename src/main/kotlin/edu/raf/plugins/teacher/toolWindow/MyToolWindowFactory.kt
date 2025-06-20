@@ -8,6 +8,7 @@ import com.intellij.ui.content.ContentFactory
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
+import edu.raf.plugins.teacher.ui.CommentsView
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
@@ -28,18 +29,24 @@ class MyToolWindowFactory : ToolWindowFactory {
         val menuPanel = JPanel()
         val createExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.CREATE_EXAM_IMAGE)))
         val downloadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.DOWNLOAD_EXAM_IMAGE)))
+        val commentsSectionIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.COMMENT_IMAGE)))
 
         val createTestButton: JButton = JButton("Postavi proveru znanja").apply {
-            icon = ImageIcon(createExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
+            icon = ImageIcon(createExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
         }
 
         val downloadExamButton: JButton = JButton("Preuzmi studentska rešenja").apply {
-            icon = ImageIcon(downloadExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH)) // Smanjenje na 20x20
+            icon = ImageIcon(downloadExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
+        }
+
+        val commentsSectionButton: JButton = JButton("Komentari").apply {
+            icon = ImageIcon(commentsSectionIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
         }
 
 
         menuPanel.add(createTestButton)
         menuPanel.add(downloadExamButton)
+        menuPanel.add(commentsSectionButton)
 
         // Dodavanje početnog menija u CardLayout
         mainPanel.add(menuPanel, "Menu")
@@ -73,6 +80,20 @@ class MyToolWindowFactory : ToolWindowFactory {
 
             // Prebacivanje na ekran za "Preuzmi proveru znanja"
             cardLayout.show(mainPanel, "StudentSolutions")
+        }
+
+        commentsSectionButton.addActionListener {
+            // Logika za "Komentari"
+           val commentsView = CommentsView();
+
+            // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
+            if (mainPanel.components.none { it == commentsView }) {
+                mainPanel.add(commentsView, "Comments")
+            }
+
+            // Prebacivanje na ekran za "Preuzmi proveru znanja"
+            cardLayout.show(mainPanel, "Comments")
+
         }
 
         // Dodavanje glavnog panela u ToolWindow

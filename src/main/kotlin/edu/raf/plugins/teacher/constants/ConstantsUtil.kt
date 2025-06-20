@@ -14,4 +14,5 @@ object ConstantsUtil {
     const val LINE_IMAGE = "line_image"
     const val NEXT_IMAGE = "next_image"
     const val PREVIOUS_IMAGE = "previous_image"
+    const val COMMENT_IMAGE = "comment_image"
 }

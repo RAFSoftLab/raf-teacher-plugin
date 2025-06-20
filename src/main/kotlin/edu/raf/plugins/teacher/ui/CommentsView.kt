@@ -30,7 +30,7 @@ class CommentsView : JPanel() {
                     font = font.deriveFont(Font.BOLD)
                 }
 
-                val fileNameLabel = JLabel(comment.fileName).apply {
+                val fileNameLabel = JLabel(comment.relativePath).apply {
                     font = font.deriveFont(Font.BOLD)
                     foreground =  Color(0xFFB4B4)//#FFB4B4
                 }

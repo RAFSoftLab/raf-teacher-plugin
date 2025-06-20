@@ -87,7 +87,7 @@ class MyToolWindowFactory : ToolWindowFactory {
             // Logika za "Komentari"
             val commentsView = CommentsView()
             val commentsController = CommentsController(commentsView)
-            commentsController.loadAndDisplayComments()
+            commentsController.loadAndDisplayComments(project)
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
             if (mainPanel.components.none { it == commentsView }) {
                 mainPanel.add(commentsView, "Comments")

@@ -1,7 +1,10 @@
 package edu.raf.plugins.teacher.ui
 
+import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.models.Comment
+import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.*
+import java.net.URL
 import javax.swing.*
 import javax.swing.border.*
 
@@ -9,14 +12,15 @@ class CommentsView : JPanel() {
     private val vBox = Box(BoxLayout.Y_AXIS)
     private val expandedComments = mutableSetOf<Long>()
     private val commentBorder = CompoundBorder(
-        MatteBorder(0, 0, 1, 0, Color(0xEEEEEE)), // Donja ivica
-        EmptyBorder(5, 5, 5, 5) // Padding
+        MatteBorder(0, 0, 1, 0, Color(0xEEEEEE)),
+        EmptyBorder(5, 5, 5, 5)
     )
+    private val trashIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.TRASH_IMAGE)))
+    private val editIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.EDIT_IMAGE)))
 
     init {
         layout = BorderLayout()
         preferredSize = Dimension(400, 400)
-
         vBox.border = EmptyBorder(5, 5, 5, 5)
         add(JScrollPane(vBox), BorderLayout.CENTER)
     }
@@ -27,10 +31,10 @@ class CommentsView : JPanel() {
         comments.forEach { comment ->
             val hBox = JPanel(BorderLayout()).apply {
                 preferredSize = Dimension(380, 30)
-                maximumSize = Dimension(380, if (expandedComments.contains(comment.id)) 500 else 30)
-                border = commentBorder // Postavljamo border
+                maximumSize = Dimension(380, if (expandedComments.contains(comment.id)) Short.MAX_VALUE.toInt() else 30)
+                border = commentBorder
 
-                // Kreiranje komponenti
+                // Main content components
                 val dashLabel = JLabel("- ").apply {
                     font = font.deriveFont(Font.BOLD)
                 }
@@ -44,24 +48,43 @@ class CommentsView : JPanel() {
                     font = font.deriveFont(Font.PLAIN)
                 }
 
-                val commentText = if (expandedComments.contains(comment.id)) {
-                    comment.commentText
+                // Use JTextArea for expanded comments to show full text with wrapping
+                val commentComponent = if (expandedComments.contains(comment.id)) {
+                    JScrollPane(JTextArea(comment.commentText).apply {
+                        lineWrap = true
+                        wrapStyleWord = true
+                        isEditable = false
+                        background = null
+                        border = null
+                        font = Font("Dialog", Font.PLAIN, 12)
+                    }).apply {
+                        preferredSize = Dimension(350, 100)
+                        border = null
+                    }
                 } else {
-                    comment.shortComment
+                    JLabel(
+                        if (comment.commentText.length > 35)
+                            "${comment.commentText.substring(0, 35)}..."
+                        else comment.commentText
+                    )
                 }
 
-                val commentLabel = JLabel(commentText)
-
-                // Panel za glavni sadržaj (leva strana)
-                val contentPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+                // Left content panel
+                val leftPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
                     add(dashLabel)
                     add(fileNameLabel)
                     add(lineNumbersLabel)
-                    add(commentLabel)
                 }
 
-                // Panel za tačkice (desna strana)
-                val dotsPanel = JPanel(FlowLayout(FlowLayout.LEFT, 0, 0)).apply {
+                // Main content panel with BorderLayout
+                val contentPanel = JPanel(BorderLayout(5, 0)).apply {
+                    add(leftPanel, BorderLayout.WEST)
+                    add(commentComponent, BorderLayout.CENTER)
+                }
+
+                // Right buttons panel
+                val buttonsPanel = JPanel(FlowLayout(FlowLayout.RIGHT, 5, 0)).apply {
+                    // Expand/collapse button
                     if (comment.commentText.length > 35) {
                         val dotsButton = JButton("...").apply {
                             font = font.deriveFont(Font.BOLD)
@@ -69,20 +92,28 @@ class CommentsView : JPanel() {
                             border = BorderFactory.createEmptyBorder()
                             preferredSize = Dimension(20, 20)
                             addActionListener {
-                                if (expandedComments.contains(comment.id)) {
-                                    expandedComments.remove(comment.id)
-                                } else {
-                                    expandedComments.add(comment.id)
-                                }
+                                expandedComments.toggle(comment.id)
                                 updateComments(comments)
                             }
                         }
                         add(dotsButton)
                     }
+
+                    // Edit button
+                    val editButton = createIconButton(editIcon, 20) {
+                        // Edit action
+                    }
+                    add(editButton)
+
+                    // Delete button
+                    val deleteButton = createIconButton(trashIcon, 20) {
+                        // Delete action
+                    }
+                    add(deleteButton)
                 }
 
                 add(contentPanel, BorderLayout.CENTER)
-                add(dotsPanel, BorderLayout.EAST)
+                add(buttonsPanel, BorderLayout.EAST)
             }
 
             vBox.add(hBox)
@@ -91,5 +122,28 @@ class CommentsView : JPanel() {
 
         vBox.revalidate()
         vBox.repaint()
+    }
+
+    private fun createIconButton(
+        icon: Icon,
+        size: Int,
+        action: () -> Unit
+    ): JButton {
+        val scaledIcon = ImageIcon(
+            (icon as? ImageIcon)?.image?.getScaledInstance(size, size, Image.SCALE_SMOOTH)
+        )
+
+        return JButton(scaledIcon).apply {
+            border = BorderFactory.createEmptyBorder()
+            preferredSize = Dimension(size + 1, size + 1)
+            isContentAreaFilled = false
+            isFocusPainted = false
+            addActionListener { action() }
+        }
+    }
+
+
+    private fun MutableSet<Long>.toggle(id: Long) {
+        if (contains(id)) remove(id) else add(id)
     }
 }

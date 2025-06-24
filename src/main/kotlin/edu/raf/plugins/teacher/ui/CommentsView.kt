@@ -1,6 +1,8 @@
 package edu.raf.plugins.teacher.ui
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.listeners.DeleteCommentListener
+import edu.raf.plugins.teacher.listeners.EditCommentListener
 import edu.raf.plugins.teacher.models.Comment
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.*
@@ -9,6 +11,9 @@ import javax.swing.*
 import javax.swing.border.*
 
 class CommentsView : JPanel() {
+    var listenerEdit: EditCommentListener? = null
+    var listenerDelete: DeleteCommentListener? = null
+
     private val vBox = Box(BoxLayout.Y_AXIS)
     private val expandedComments = mutableSetOf<Long>()
     private val commentBorder = CompoundBorder(
@@ -108,6 +113,7 @@ class CommentsView : JPanel() {
                     // Delete button
                     val deleteButton = createIconButton(trashIcon, 20) {
                         // Delete action
+                        listenerDelete?.onDeleteComment(comment)
                     }
                     add(deleteButton)
                 }

@@ -93,7 +93,7 @@ class MyToolWindowFactory : ToolWindowFactory {
                 mainPanel.add(commentsView, "Comments")
             }
 
-            // Prebacivanje na ekran za "Preuzmi proveru znanja"
+            // Prebacivanje na ekran za "Komentari"
             cardLayout.show(mainPanel, "Comments")
 
         }

@@ -14,4 +14,10 @@ object ConstantsUtil {
     const val LINE_IMAGE = "line_image"
     const val NEXT_IMAGE = "next_image"
     const val PREVIOUS_IMAGE = "previous_image"
+    const val COMMENT_IMAGE = "comment_image"
+    const val TRASH_IMAGE = "trash_image"
+    const val EDIT_IMAGE = "edit_image"
+
+    const val COMMENTS_DIRECTORY = "user.home"
+    const val COMMENTS_FILE = "raf_teacher_cmnts.npl"
 }

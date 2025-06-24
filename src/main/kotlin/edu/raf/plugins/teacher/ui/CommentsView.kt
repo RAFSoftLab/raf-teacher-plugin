@@ -22,13 +22,42 @@ class CommentsView : JPanel() {
     )
     private val trashIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.TRASH_IMAGE)))
     private val editIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.EDIT_IMAGE)))
+    private val backIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.BACK_IMAGE)))
 
+    private val backToMenuButton: JButton = JButton("Vrati se na glavni menu").apply {
+        font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+        preferredSize = Dimension(180, 30) // Manje dugme
+        val resizedIcon = ImageIcon(backIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+        icon = resizedIcon
+
+
+    }
     init {
         layout = BorderLayout()
         preferredSize = Dimension(400, 400)
         vBox.border = EmptyBorder(5, 5, 5, 5)
-        add(JScrollPane(vBox), BorderLayout.CENTER)
+
+        // Create a panel that will hold both the scroll pane and the button
+        val mainPanel = JPanel(BorderLayout())
+        mainPanel.add(JScrollPane(vBox), BorderLayout.CENTER)
+
+        // Create a panel for the button with some padding
+        val buttonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 0, 5)).apply {
+            border = EmptyBorder(5, 5, 5, 5) // Add some padding
+            add(backToMenuButton)
+        }
+
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH)
+        add(mainPanel, BorderLayout.CENTER)
+
+        backToMenuButton.addActionListener {
+            val parentPanel = this.parent as? JPanel
+            val cardLayout = parentPanel?.layout as? CardLayout
+            cardLayout?.show(parentPanel, "Menu")
+
+        }
     }
+
 
     fun updateComments(comments: List<Comment>) {
         vBox.removeAll()
@@ -131,6 +160,7 @@ class CommentsView : JPanel() {
         vBox.repaint()
     }
 
+
     private fun createIconButton(
         icon: Icon,
         size: Int,
@@ -153,4 +183,6 @@ class CommentsView : JPanel() {
     private fun MutableSet<Long>.toggle(id: Long) {
         if (contains(id)) remove(id) else add(id)
     }
+
+
 }

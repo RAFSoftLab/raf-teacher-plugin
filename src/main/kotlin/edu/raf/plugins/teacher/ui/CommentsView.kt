@@ -107,6 +107,7 @@ class CommentsView : JPanel() {
                     // Edit button
                     val editButton = createIconButton(editIcon, 20) {
                         // Edit action
+                        listenerEdit?.onEditComment(comment)
                     }
                     add(editButton)
 

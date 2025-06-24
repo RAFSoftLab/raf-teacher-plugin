@@ -6,7 +6,9 @@ import edu.raf.plugins.teacher.listeners.EditCommentListener
 import edu.raf.plugins.teacher.models.Comment
 import edu.raf.plugins.teacher.services.CommentService
 import edu.raf.plugins.teacher.ui.CommentsView
-import javax.swing.JOptionPane
+import java.awt.BorderLayout
+import java.awt.FlowLayout
+import javax.swing.*
 
 class CommentsController(private val view: CommentsView,  private val project: Project) : EditCommentListener, DeleteCommentListener {
     init {
@@ -21,12 +23,54 @@ class CommentsController(private val view: CommentsView,  private val project: P
         view.updateComments(comments)
     }
 
-    override fun onEditComment(comment: Comment, newText: String) {
-        TODO("Not yet implemented")
+    override fun onEditComment(comment: Comment) {
+        val dialog = JDialog().apply {
+            title = "Izmena komentara"
+            setSize(400, 300)
+            setLocationRelativeTo(view)
+            layout = BorderLayout()
+            isModal = true
+        }
+
+        val textArea = JTextArea(comment.commentText).apply {
+            lineWrap = true
+            wrapStyleWord = true
+        }
+
+        val saveButton = JButton("Sačuvaj").apply {
+            addActionListener {
+                val updatedText = textArea.text.trim()
+                if (updatedText.isNotEmpty()) {
+                    val updatedComment = comment.copy(commentText = updatedText)
+                    val updatedComments = commentService.updateComment(updatedComment, project)
+                    view.updateComments(updatedComments)
+                    dialog.dispose()
+                } else {
+                    JOptionPane.showMessageDialog(
+                        dialog,
+                        "Komentar mora imati tekst.",
+                        "Greška",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+                }
+            }
+        }
+
+        val cancelButton = JButton("Nazad").apply {
+            addActionListener { dialog.dispose() }
+        }
+
+        val buttonPanel = JPanel(FlowLayout(FlowLayout.RIGHT)).apply {
+            add(saveButton)
+            add(cancelButton)
+        }
+
+        dialog.add(JScrollPane(textArea), BorderLayout.CENTER)
+        dialog.add(buttonPanel, BorderLayout.SOUTH)
+        dialog.isVisible = true
     }
 
     override fun onDeleteComment(comment: Comment) {
-        println("Deleting comment: ${comment.id}")
         val options = arrayOf("Da", "Ne")
         val confirmation = JOptionPane.showOptionDialog(
             view,

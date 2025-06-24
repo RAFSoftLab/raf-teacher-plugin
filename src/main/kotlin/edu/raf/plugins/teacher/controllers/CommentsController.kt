@@ -8,7 +8,7 @@ import edu.raf.plugins.teacher.services.CommentService
 import edu.raf.plugins.teacher.ui.CommentsView
 import javax.swing.JOptionPane
 
-class CommentsController(private val view: CommentsView) : EditCommentListener, DeleteCommentListener {
+class CommentsController(private val view: CommentsView,  private val project: Project) : EditCommentListener, DeleteCommentListener {
     init {
         view.listenerEdit = this
         view.listenerDelete = this
@@ -16,7 +16,7 @@ class CommentsController(private val view: CommentsView) : EditCommentListener, 
 
     private val commentService = CommentService()
 
-    fun loadAndDisplayComments(project: Project) {
+    fun loadAndDisplayComments() {
         val comments = commentService.loadCommentsForCurrentProject(project)
         view.updateComments(comments)
     }
@@ -40,8 +40,8 @@ class CommentsController(private val view: CommentsView) : EditCommentListener, 
         )
 
         if (confirmation == JOptionPane.YES_OPTION) {
-             commentService.deleteComment(comment)
-           // val updatedComments = commentService.loadCommentsForCurrentProject(project)
+            val updatedComments =  commentService.deleteComment(comment, project)
+            view.updateComments(updatedComments)
         }
 
     }

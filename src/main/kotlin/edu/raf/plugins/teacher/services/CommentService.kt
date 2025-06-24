@@ -39,7 +39,7 @@ class CommentService {
         }
     }
 
-    fun deleteComment(commentToDelete: Comment) {
+    fun deleteComment(commentToDelete: Comment, project: Project): List<Comment> {
         val logFile = File(
             System.getProperty(ConstantsUtil.COMMENTS_DIRECTORY) +
                     File.separator +
@@ -48,23 +48,28 @@ class CommentService {
 
         if (!logFile.exists()) {
             println("Fajl sa komentarima ne postoji: ${logFile.absolutePath}")
-            return
+            return emptyList()
         }
 
-        try {
+        return try {
             // Read existing comments
             val allComments = jsonFormat.decodeFromString<List<Comment>>(logFile.readText())
 
             // Filter out the comment to delete
-            val updatedComments = allComments.filter { it.id != commentToDelete.id }
+            val updatedComments = allComments
+                .filter { it.id != commentToDelete.id && it.matchesProject(project) }
 
             // Write updated comments back to the file
             logFile.writeText(jsonFormat.encodeToString(updatedComments))
             println("Komentar sa ID-jem ${commentToDelete.id} je uspešno obrisan.")
+
+            updatedComments
         } catch (e: SerializationException) {
             println("Greška pri parsiranju komentara: ${e.message}")
+            emptyList()
         } catch (e: Exception) {
             println("Greška pri radu sa fajlom: ${e.message}")
+            emptyList()
         }
     }
 }

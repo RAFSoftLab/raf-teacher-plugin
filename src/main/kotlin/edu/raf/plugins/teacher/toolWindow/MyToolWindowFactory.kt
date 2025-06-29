@@ -9,6 +9,7 @@ import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.controllers.CommentsController
 import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
+import edu.raf.plugins.teacher.listeners.selection.SetUpSelectionListener
 import edu.raf.plugins.teacher.ui.CommentsView
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
@@ -23,6 +24,9 @@ import javax.swing.JPanel
 class MyToolWindowFactory : ToolWindowFactory {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val selectionListener = SetUpSelectionListener(project)
+        selectionListener.setupEditorListener()
+
         val cardLayout = CardLayout()
         val mainPanel = JPanel(cardLayout)
 

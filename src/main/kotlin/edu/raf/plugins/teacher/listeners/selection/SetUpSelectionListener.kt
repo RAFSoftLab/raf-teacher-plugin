@@ -63,6 +63,24 @@ class SetUpSelectionListener(private val project: Project) {
             println("Fajl: $filePath")
             println("Linije: $startLine - $endLine")
 
+            // Prikaz popup prozora
+            val textArea = JTextArea(selectedText)
+            textArea.isEditable = false
+            textArea.lineWrap = true
+            textArea.wrapStyleWord = true
+
+            val scrollPane = JBScrollPane(textArea)
+
+            val popup = JBPopupFactory.getInstance()
+                .createComponentPopupBuilder(scrollPane, textArea)
+                .setTitle("Selektovani tekst")
+                .setResizable(true)
+                .setMovable(true)
+                .setRequestFocus(false)
+                .createPopup()
+
+            popup.showInBestPositionFor(editor)
+
         }
     }
 }

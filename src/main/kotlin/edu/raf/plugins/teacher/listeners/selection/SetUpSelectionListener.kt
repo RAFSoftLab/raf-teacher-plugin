@@ -8,79 +8,109 @@ import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.ui.components.JBScrollPane
 import com.intellij.openapi.util.Disposer
-import javax.swing.JTextArea
+import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.utils.ImageLoader
+import javax.swing.JButton
+import javax.swing.JPanel
+import java.awt.BorderLayout
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Image
+import java.net.URL
+import javax.swing.ImageIcon
 
 class SetUpSelectionListener(private val project: Project) {
-    private var selectedText: String? = null
-    private var filePath: String? = null
-    private var startLine: Int = -1
-    private var endLine: Int = -1
+    private var currentPopup: com.intellij.openapi.ui.popup.JBPopup? = null
 
     fun setupEditorListener() {
-        println("Pokrećem setup selection listener...")
         project.messageBus.connect().subscribe(
             FileEditorManagerListener.FILE_EDITOR_MANAGER,
             object : FileEditorManagerListener {
                 override fun selectionChanged(event: FileEditorManagerEvent) {
-                    val editor = event.manager.selectedTextEditor
-                    if (editor != null) {
+                    event.manager.selectedTextEditor?.let { editor ->
                         val listener = object : SelectionListener {
                             override fun selectionChanged(e: SelectionEvent) {
-                                updateSelectionInfo(editor)
+                                handleSelectionChange(editor)
                             }
                         }
 
-                        // Dodaj listener
                         editor.selectionModel.addSelectionListener(listener)
-
-                        // Registruj za cleanup uz projekat
                         Disposer.register(project) {
                             editor.selectionModel.removeSelectionListener(listener)
+                            closePopup()
                         }
 
-                        // Ako već postoji selekcija
-                        updateSelectionInfo(editor)
+                        handleSelectionChange(editor)
                     }
                 }
             }
         )
     }
 
-    private fun updateSelectionInfo(editor: Editor) {
+    private fun handleSelectionChange(editor: Editor) {
         val selectionModel = editor.selectionModel
-        selectedText = selectionModel.selectedText
+        val selectedText = selectionModel.selectedText
         val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document)
 
+        closePopup() // Uvek zatvorimo prethodni popup kada se promeni selekcija
+
         if (!selectedText.isNullOrEmpty()) {
-            filePath = psiFile?.virtualFile?.path
-            startLine = selectionModel.selectionStartPosition?.line ?: -1
-            endLine = selectionModel.selectionEndPosition?.line ?: -1
+            val filePath = psiFile?.virtualFile?.path
+            val startLine = selectionModel.selectionStartPosition?.line ?: -1
+            val endLine = selectionModel.selectionEndPosition?.line ?: -1
 
-            println("-------------------------")
-            println("Selektovani tekst: $selectedText")
-            println("Fajl: $filePath")
-            println("Linije: $startLine - $endLine")
+            showPopup(editor, filePath, startLine, endLine)
+        }
+    }
 
-            // Prikaz popup prozora
-            val textArea = JTextArea(selectedText)
-            textArea.isEditable = false
-            textArea.lineWrap = true
-            textArea.wrapStyleWord = true
+    private fun showPopup(editor: Editor, filePath: String?, startLine: Int, endLine: Int) {
 
-            val scrollPane = JBScrollPane(textArea)
+         val insertCommentIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.COMMENT_ENTER_IMAGE)))
 
-            val popup = JBPopupFactory.getInstance()
-                .createComponentPopupBuilder(scrollPane, textArea)
-                .setTitle("Selektovani tekst")
-                .setResizable(true)
-                .setMovable(true)
-                .setRequestFocus(false)
-                .createPopup()
+         val insertCommentButton: JButton = JButton("Unesi komentar").apply {
+            font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
+            preferredSize = Dimension(180, 30) // Manje dugme
+            val resizedIcon = ImageIcon(insertCommentIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+            icon = resizedIcon
+            addActionListener {
+                if (filePath != null) {
+                    // Logika za unos komentara
+                    println("Unos komentara za fajl: $filePath, linije: $startLine - $endLine")
 
-            popup.showInBestPositionFor(editor)
+                } else {
+                    println("Nije moguće uneti komentar jer fajl nije pronađen.")
+                }
+                closePopup()
+            }
 
         }
+
+//        val button = JButton("Prikaži informacije").apply {
+//            addActionListener {
+//                println("Fajl: $filePath")
+//                println("Linije: $startLine - $endLine")
+//            }
+//        }
+
+        val panel = JPanel(BorderLayout()).apply {
+            add(insertCommentButton, BorderLayout.CENTER)
+        }
+
+        currentPopup = JBPopupFactory.getInstance()
+            .createComponentPopupBuilder(panel, insertCommentButton)
+            .setResizable(false)
+            .setMovable(true)
+            .setRequestFocus(false)
+            .createPopup()
+            .also { popup ->
+                popup.showInBestPositionFor(editor)
+                Disposer.register(project) { popup.dispose() }
+            }
+    }
+
+    private fun closePopup() {
+        currentPopup?.dispose()
+        currentPopup = null
     }
 }

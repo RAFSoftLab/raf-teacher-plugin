@@ -9,6 +9,8 @@ import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.controllers.CommentsController
 import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
+import edu.raf.plugins.teacher.listeners.selection.SetUpSelectionListener
+import edu.raf.plugins.teacher.services.CommentService
 import edu.raf.plugins.teacher.ui.CommentsView
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
@@ -21,8 +23,12 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 class MyToolWindowFactory : ToolWindowFactory {
+    private val commentService = CommentService()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        val selectionListener = SetUpSelectionListener(project, commentService)
+        selectionListener.setupEditorListener()
+
         val cardLayout = CardLayout()
         val mainPanel = JPanel(cardLayout)
 
@@ -86,7 +92,8 @@ class MyToolWindowFactory : ToolWindowFactory {
         commentsSectionButton.addActionListener {
             // Logika za "Komentari"
             val commentsView = CommentsView()
-            val commentsController = CommentsController(commentsView, project)
+
+            val commentsController = CommentsController(commentsView, project, commentService)
             commentsController.loadAndDisplayComments()
             // Dodavanje novog sadržaja u CardLayout (ako nije već dodato)
             if (mainPanel.components.none { it == commentsView }) {

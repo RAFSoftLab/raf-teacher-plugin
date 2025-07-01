@@ -4,13 +4,14 @@ import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.listeners.DeleteCommentListener
 import edu.raf.plugins.teacher.listeners.EditCommentListener
 import edu.raf.plugins.teacher.models.Comment
+import edu.raf.plugins.teacher.observer.Subscriber
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.*
 import java.net.URL
 import javax.swing.*
 import javax.swing.border.*
 
-class CommentsView : JPanel() {
+class CommentsView : JPanel()  , Subscriber {
     var listenerEdit: EditCommentListener? = null
     var listenerDelete: DeleteCommentListener? = null
 
@@ -182,6 +183,16 @@ class CommentsView : JPanel() {
 
     private fun MutableSet<Long>.toggle(id: Long) {
         if (contains(id)) remove(id) else add(id)
+    }
+
+    override fun update(data: Any) {
+        println("Pokrecem update");
+        if (data is List<*>) {
+            val comments = data.filterIsInstance<Comment>()
+            updateComments(comments)
+        } else {
+            println("Unsupported data type received: ${data::class.simpleName}")
+        }
     }
 
 

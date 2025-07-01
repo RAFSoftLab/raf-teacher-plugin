@@ -10,6 +10,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.Disposer
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.services.CommentService
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.BorderLayout
 import java.awt.Dimension
@@ -20,6 +21,7 @@ import javax.swing.*
 
 class SetUpSelectionListener(private val project: Project) {
     private var currentPopup: com.intellij.openapi.ui.popup.JBPopup? = null
+    private val commentService = CommentService()
 
     fun setupEditorListener() {
         project.messageBus.connect().subscribe(
@@ -58,69 +60,88 @@ class SetUpSelectionListener(private val project: Project) {
             val startLine = selectionModel.selectionStartPosition?.line ?: -1
             val endLine = selectionModel.selectionEndPosition?.line ?: -1
 
-            showPopup(editor, filePathRelative, startLine, endLine)
+            // Auomatski je za jednu liniju manje nego inace, jer brojanje krece od 0
+            showPopup(editor, filePathRelative, startLine + 1, endLine + 1)
         }
     }
 
     private fun showPopup(editor: Editor, filePathRelative: String?, startLine: Int, endLine: Int) {
 
-         val insertCommentIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.COMMENT_ENTER_IMAGE)))
+        val insertCommentIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.COMMENT_ENTER_IMAGE)))
 
-         val insertCommentButton: JButton = JButton("Unesi komentar").apply {
+        val insertCommentButton: JButton = JButton("Unesi komentar").apply {
             font = font.deriveFont(Font.ITALIC, 12f) // Manji font, stil Italic
             preferredSize = Dimension(180, 30) // Manje dugme
-            val resizedIcon = ImageIcon(insertCommentIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
+            val resizedIcon =
+                ImageIcon(insertCommentIcon.image.getScaledInstance(16, 16, Image.SCALE_SMOOTH)) // Smanjivanje ikone
             icon = resizedIcon
-             addActionListener {
-                 if (filePathRelative != null) {
-                     val dialog = JDialog().apply {
-                         title = "Dodavanje komentara"
-                         setSize(400, 300)
-                         setLocationRelativeTo(null)
-                         layout = BorderLayout()
-                         isModal = true
-                     }
+            addActionListener {
+                if (filePathRelative != null) {
+                    val dialog = JDialog().apply {
+                        title = "Dodavanje komentara"
+                        setSize(400, 300)
+                        setLocationRelativeTo(null)
+                        layout = BorderLayout()
+                        isModal = true
+                    }
 
-                     val infoLabel = JLabel("<html>Fajl: <b>$filePathRelative</b><br>Označene linije: <b>$startLine - $endLine</b></html>").apply {
-                         border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
-                     }
+                    val infoLabel =
+                        JLabel("<html>Fajl: <b>$filePathRelative</b><br>Označene linije: <b>$startLine - $endLine</b></html>").apply {
+                            border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
+                        }
 
-                     val commentField = JTextArea().apply {
-                         lineWrap = true
-                         wrapStyleWord = true
-                         border = BorderFactory.createTitledBorder("Tekst komentara")
-                     }
+                    val commentField = JTextArea().apply {
+                        lineWrap = true
+                        wrapStyleWord = true
+                        border = BorderFactory.createTitledBorder("Tekst komentara")
+                    }
 
-                     val submitButton = JButton("Unesi").apply {
-                         addActionListener {
-                             val commentText = commentField.text.trim()
-                             if (commentText.isNotEmpty()) {
-                                 println("Comment submitted for file: $filePathRelative, lines: $startLine - $endLine")
-                                 println("Comment: $commentText")
-                                 dialog.dispose()
-                             } else {
-                                 JOptionPane.showMessageDialog(
-                                     dialog,
-                                     "Komentar ne može biti prazan.",
-                                     "Greška",
-                                     JOptionPane.ERROR_MESSAGE
-                                 )
-                             }
-                         }
-                     }
+                    val submitButton = JButton("Unesi").apply {
+                        addActionListener {
+                            val commentText = commentField.text.trim()
+                            if (commentText.isNotEmpty()) {
+                                println("Comment submitted for file: $filePathRelative, lines: $startLine - $endLine")
+                                println("Comment: $commentText")
+                                val isSavedComment = commentService.saveComment(
+                                    commentText,
+                                    filePathRelative,
+                                    startLine,
+                                    endLine,
+                                    project
+                                )
 
-                     val panel = JPanel(BorderLayout()).apply {
-                         add(infoLabel, BorderLayout.NORTH)
-                         add(JScrollPane(commentField), BorderLayout.CENTER)
-                         add(submitButton, BorderLayout.SOUTH)
-                     }
+                                if (!isSavedComment)
+                                    JOptionPane.showMessageDialog(
+                                        dialog,
+                                        "Komentar nije sačuvan, proverite da komentar sa označenim linijama koda već ne postoji.",
+                                        "Greška",
+                                        JOptionPane.ERROR_MESSAGE
+                                    )
 
-                     dialog.add(panel)
-                     dialog.isVisible = true
-                 } else {
-                     println("File path is not available.")
-                 }
-             }
+                                dialog.dispose()
+                            } else {
+                                JOptionPane.showMessageDialog(
+                                    dialog,
+                                    "Komentar mora imati tekst.",
+                                    "Greška",
+                                    JOptionPane.ERROR_MESSAGE
+                                )
+                            }
+                        }
+                    }
+
+                    val panel = JPanel(BorderLayout()).apply {
+                        add(infoLabel, BorderLayout.NORTH)
+                        add(JScrollPane(commentField), BorderLayout.CENTER)
+                        add(submitButton, BorderLayout.SOUTH)
+                    }
+
+                    dialog.add(panel)
+                    dialog.isVisible = true
+                } else {
+                    println("File path is not available.")
+                }
+            }
         }
 
 //

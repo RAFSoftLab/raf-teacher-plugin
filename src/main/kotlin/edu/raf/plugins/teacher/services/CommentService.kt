@@ -7,11 +7,12 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.security.MessageDigest
 
 class CommentService {
     private val jsonFormat = Json { ignoreUnknownKeys = true }
 
-    public fun loadCommentsForCurrentProject(project: Project): List<Comment> {
+    fun loadCommentsForCurrentProject(project: Project): List<Comment> {
         val logFile = File(
             System.getProperty(ConstantsUtil.COMMENTS_DIRECTORY) +
                     File.separator +
@@ -111,4 +112,64 @@ class CommentService {
             emptyList()
         }
     }
+
+
+    fun saveComment(commentText: String, filePath: String?, startLine: Int, endLine: Int, project: Project): Boolean {
+        val logFile = File(
+            System.getProperty(ConstantsUtil.COMMENTS_DIRECTORY) +
+                    File.separator +
+                    ConstantsUtil.COMMENTS_FILE
+        )
+
+        if (filePath == null) {
+            println("File path is null. Cannot save comment.")
+            return false
+        }
+
+        val newComment = Comment(
+            id = generateUniqueId(filePath, startLine, endLine),
+            relativePath = filePath,
+            commentText = commentText,
+            startLine = startLine,
+            endLine = endLine,
+            timestamp = System.currentTimeMillis().toString(),
+            projectName = project.name
+        )
+
+        return try {
+            // Read existing comments
+            val existingComments = if (logFile.exists() && logFile.readText().isNotBlank()) {
+                jsonFormat.decodeFromString<List<Comment>>(logFile.readText())
+            } else {
+                emptyList()
+            }
+
+            // Check if a comment with the same ID already exists
+            if (existingComments.any { it.id == newComment.id }) {
+                println("Comment with the same ID already exists.")
+                return false
+            }
+
+            // Add the new comment
+            val updatedComments = existingComments + newComment
+
+            // Write updated comments back to the file
+            logFile.writeText(jsonFormat.encodeToString(updatedComments))
+
+            true
+        } catch (e: SerializationException) {
+            println("Error parsing comments: ${e.message}")
+            false
+        } catch (e: Exception) {
+            println("Error working with file: ${e.message}")
+            false
+        }
+    }
+
+    private fun generateUniqueId(filePath: String, startLine: Int, endLine: Int): Long {
+        val input = "$filePath$startLine$endLine"
+        val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
+        return bytes.fold(0L) { acc, byte -> acc * 31 + byte }
+    }
+
 }

@@ -3,14 +3,17 @@ package edu.raf.plugins.teacher.services
 import com.intellij.openapi.project.Project
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.models.Comment
+import edu.raf.plugins.teacher.observer.Publisher
+import edu.raf.plugins.teacher.observer.Subscriber
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.security.MessageDigest
 
-class CommentService {
+class CommentService : Publisher {
     private val jsonFormat = Json { ignoreUnknownKeys = true }
+    private val subscribers = mutableListOf<Subscriber>()
 
     fun loadCommentsForCurrentProject(project: Project): List<Comment> {
         val logFile = File(
@@ -153,6 +156,8 @@ class CommentService {
             // Add the new comment
             val updatedComments = existingComments + newComment
 
+            notifySubscribers(updatedComments)
+
             // Write updated comments back to the file
             logFile.writeText(jsonFormat.encodeToString(updatedComments))
 
@@ -170,6 +175,26 @@ class CommentService {
         val input = "$filePath$startLine$endLine"
         val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
         return bytes.fold(0L) { acc, byte -> acc * 31 + byte }
+    }
+
+    override fun addSubscriber(subscriber: Subscriber) {
+        println("Dodajem pretplatnika na promene komentara")
+        if (!subscribers.contains(subscriber)) {
+            subscribers.add(subscriber)
+        }
+        println("Broj pretplatnika: ${subscribers.size}")
+    }
+
+    override fun removeSubscriber(subscriber: Subscriber) {
+        subscribers.remove(subscriber)
+    }
+
+    override fun notifySubscribers(data: Any) {
+        println("Obavestavam pretplatnike o promenama komentara")
+        println(subscribers.size)
+        for (subscriber in subscribers) {
+            subscriber.update(data)
+        }
     }
 
 }

@@ -10,6 +10,8 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.Disposer
 import edu.raf.plugins.teacher.constants.ConstantsUtil
+import edu.raf.plugins.teacher.observer.Publisher
+import edu.raf.plugins.teacher.observer.Subscriber
 import edu.raf.plugins.teacher.services.CommentService
 import edu.raf.plugins.teacher.utils.ImageLoader
 import java.awt.BorderLayout
@@ -19,9 +21,10 @@ import java.awt.Image
 import java.net.URL
 import javax.swing.*
 
-class SetUpSelectionListener(private val project: Project) {
+class SetUpSelectionListener(private val project: Project, private val commentService: CommentService)  {
     private var currentPopup: com.intellij.openapi.ui.popup.JBPopup? = null
-    private val commentService = CommentService()
+
+
 
     fun setupEditorListener() {
         project.messageBus.connect().subscribe(
@@ -166,4 +169,6 @@ class SetUpSelectionListener(private val project: Project) {
         currentPopup?.dispose()
         currentPopup = null
     }
+
+
 }

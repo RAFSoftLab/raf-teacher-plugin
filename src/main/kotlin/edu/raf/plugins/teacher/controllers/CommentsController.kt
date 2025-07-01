@@ -10,13 +10,15 @@ import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*
 
-class CommentsController(private val view: CommentsView,  private val project: Project) : EditCommentListener, DeleteCommentListener {
+class CommentsController(private val view: CommentsView,  private val project: Project,private val commentService: CommentService) : EditCommentListener, DeleteCommentListener {
+
     init {
+
         view.listenerEdit = this
         view.listenerDelete = this
+        commentService.addSubscriber(view)
     }
 
-    private val commentService = CommentService()
 
     fun loadAndDisplayComments() {
         val comments = commentService.loadCommentsForCurrentProject(project)

@@ -102,7 +102,7 @@ class SetUpSelectionListener(private val project: Project) {
                                  JOptionPane.showMessageDialog(
                                      dialog,
                                      "Komentar ne može biti prazan.",
-                                     "Error",
+                                     "Greška",
                                      JOptionPane.ERROR_MESSAGE
                                  )
                              }

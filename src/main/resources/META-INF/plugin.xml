@@ -1,17 +1,14 @@
 <idea-plugin>
-    <id>org.jetbrains.plugins.template</id>
-    <name>Nastavnički Plugin - RAF</name>
-    <vendor>JetBrains</vendor>
+    <id>com.zarko.nastavnicki</id>
+    <name>nastavnicki-plugin</name>
+    <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
 
+    <version>${pluginVersion}</version> <!-- Ažurirano , uzima iz gradle.properties-->
+    <description>Plugin za nastavnike u IntelliJ-u</description>
 
-    <version>1.0</version>
-    <description>Opis plugin-a</description>
-
-    <!-- Icon ide ovde, na vrhu -->
-    <idea-version since-build="193"/>
+    <idea-version since-build="241.0" until-build="242.*"/>  <!-- Ažurirano za 2024.2.3 -->
 
     <depends>com.intellij.modules.platform</depends>
-
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">

@@ -65,6 +65,8 @@ intellijPlatform {
     pluginConfiguration {
         version = providers.gradleProperty("pluginVersion")
 
+
+
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
@@ -136,6 +138,10 @@ kover {
 }
 
 tasks {
+    patchPluginXml {
+        pluginId.set("com.zarko.nastavnicki") // 🔁 Ovo je novi ID
+    }
+
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
     }

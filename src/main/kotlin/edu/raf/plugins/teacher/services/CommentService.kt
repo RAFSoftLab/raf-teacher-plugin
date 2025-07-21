@@ -59,15 +59,14 @@ class CommentService : Publisher {
             // Read existing comments
             val allComments = jsonFormat.decodeFromString<List<Comment>>(logFile.readText())
 
-            // Filter out the comment to delete
-            val updatedComments = allComments
-                .filter { it.id != commentToDelete.id && it.matchesProject(project) }
+            // Filter out only the comment to delete
+            val updatedComments = allComments.filter { it.id != commentToDelete.id }
 
             // Write updated comments back to the file
             logFile.writeText(jsonFormat.encodeToString(updatedComments))
 
-
-            updatedComments
+            // Return only comments for the current project
+            updatedComments.filter { it.matchesProject(project) }
         } catch (e: SerializationException) {
             println("Greška pri parsiranju komentara: ${e.message}")
             emptyList()

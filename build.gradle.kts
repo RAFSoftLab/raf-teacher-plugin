@@ -151,7 +151,7 @@ tasks {
     }
     // Automatski pravi novi build i deploy-uje plugin
     register("deployPlugin") {
-        dependsOn("build")
+        dependsOn("build", "buildPlugin")
 
         doLast {
             val version = project.property("pluginVersion") as String

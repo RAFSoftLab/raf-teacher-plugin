@@ -23,7 +23,7 @@ data class Comment(
         return "$baseDir${File.separator}$relativePath"
     }
 
-    // Skraćeni komentar (prvih 20 karaktera)
+    // Skraćeni komentar (prvih 20 karaktera...)
     val shortComment: String
         get() = if (commentText.length <= 35) commentText
         else commentText.substring(0, 35) + "..."

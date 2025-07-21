@@ -189,7 +189,7 @@ class CommentService : Publisher {
     }
 
     override fun notifySubscribers(data: Any) {
-        println("Obavestavam pretplatnike o promenama komentara")
+        println("Obavestavam pretplatnike o promenama komentara!")
         println(subscribers.size)
         for (subscriber in subscribers) {
             subscriber.update(data)

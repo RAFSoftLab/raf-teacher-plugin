@@ -51,8 +51,18 @@ jobs:
 
       - name: Copy plugin files
         run: |
-          mkdir -p gh-pages/nastavnicki
-          cp -r nastavnicki/* gh-pages/nastavnicki/
+          # Create directory structure
+          if (!(Test-Path -Path "gh-pages\nastavnicki")) {
+            New-Item -ItemType Directory -Path "gh-pages\nastavnicki" -Force | Out-Null
+          }
+          # Copy all files
+          if (Test-Path -Path "nastavnicki\*") {
+            Copy-Item -Path "nastavnicki\*" -Destination "gh-pages\nastavnicki\" -Recurse -Force
+          } else {
+            Write-Host "No files found in nastavnicki directory"
+          }
+          # Verify copy
+          Get-ChildItem -Path "gh-pages\nastavnicki\" -Recurse | Select-Object FullName
 
       - name: Commit and push changes
         working-directory: gh-pages

@@ -27,6 +27,7 @@ jobs:
       - name: Build and deploy plugin
         run: ./gradlew deployPlugin
         env:
+          CI: "true"
           SERVER_GIT_USERNAME: ${{ secrets.SERVER_GIT_USERNAME }}
           SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
           SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}

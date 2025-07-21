@@ -66,7 +66,6 @@ intellijPlatform {
         version = providers.gradleProperty("pluginVersion")
 
 
-
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
             val start = "<!-- Plugin description -->"
@@ -110,7 +109,8 @@ intellijPlatform {
         // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
         // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
         // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+        channels = providers.gradleProperty("pluginVersion")
+            .map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
     }
 
     pluginVerification {
@@ -136,7 +136,7 @@ kover {
         }
     }
 }
-
+val isCI = System.getenv("CI") != null
 tasks {
     patchPluginXml {
         pluginId.set("com.zarko.nastavnicki") // 🔁 Ovo je novi ID
@@ -156,56 +156,97 @@ tasks {
         doLast {
             val version = project.property("pluginVersion") as String
             val srcFile = file("build/distributions/nastavnicki-plugin-${version}.zip")
-            val destDir = file("C:/Users/Zarko/mojiPlugins/nastavnicki/")
 
-            copy {
-                from(srcFile)
-                into(destDir)
+            if (!srcFile.exists()) {
+                throw GradleException("Ne postoji plugin zip fajl: $srcFile")
             }
 
-            // Ažuriraj updatePlugins.xml
-            val updateFile = file("${destDir}/updatePlugins.xml")
-            val newPluginEntry = """
-            <plugin id="com.raf.nastavnicki"
-                    url="https://github.com/zarko-ned/zarko.github.io/raw/main/nastavnicki/nastavnicki-plugin-${version}.zip"
-                    version="${version}">
-                <name>Nastavnički Plugin - RAF</name>
-                <description>Plugin za nastavnike u IntelliJ-u</description>
-                <idea-version since-build="241.0" until-build="999.*"/>  
-                <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
-            </plugin>
+            if (isCI) {
+                println("CI okruženje: preskačem lokalno kopiranje na C:/Users/...")
+
+                // ✅ Samo ažuriraj `updatePlugins.xml` fajl u projektu, koji će biti push-ovan u GitHub Pages
+                val updateFile = file("nastavnicki/updatePlugins.xml")
+                val newPluginEntry = """
+                <plugin id="com.raf.nastavnicki"
+                        url="https://zarko-ned.github.io/nastavnicki/nastavnicki-plugin-${version}.zip"
+                        version="${version}">
+                    <name>Nastavnički Plugin - RAF</name>
+                    <description>Plugin za nastavnike u IntelliJ-u</description>
+                    <idea-version since-build="241.0" until-build="999.*"/>  
+                    <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
+                </plugin>
             """.trimIndent()
 
-            val content = """
-            <plugins>
-                $newPluginEntry
-                ${updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")?.substringBeforeLast("</plugins>")?.trim()}
-            </plugins>
+                val content = """
+                <plugins>
+                    $newPluginEntry
+                    ${
+                    updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")
+                        ?.substringBeforeLast("</plugins>")?.trim()
+                }
+                </plugins>
             """.trimIndent()
 
-            updateFile.writeText(content)
+                updateFile.writeText(content)
 
-            println("Plugin verzije $version uspešno deploy-ovan u ${destDir}")
+                // Kopiraj plugin zip u folder koji je deo GitHub Pages
+                val destZip = file("nastavnicki/nastavnicki-plugin-${version}.zip")
+                srcFile.copyTo(destZip, overwrite = true)
+
+            } else {
+                println("Lokalno okruženje: deploy na C:/Users/Zarko/mojiPlugins")
+                val destDir = file("C:/Users/Zarko/mojiPlugins/nastavnicki/")
+                val updateFile = file("${destDir}/updatePlugins.xml")
+
+                copy {
+                    from(srcFile)
+                    into(destDir)
+                }
+
+                val newPluginEntry = """
+                <plugin id="com.raf.nastavnicki"
+                        url="https://github.com/zarko-ned/zarko.github.io/raw/main/nastavnicki/nastavnicki-plugin-${version}.zip"
+                        version="${version}">
+                    <name>Nastavnički Plugin - RAF</name>
+                    <description>Plugin za nastavnike u IntelliJ-u</description>
+                    <idea-version since-build="241.0" until-build="999.*"/>  
+                    <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
+                </plugin>
+            """.trimIndent()
+
+                val content = """
+                <plugins>
+                    $newPluginEntry
+                    ${
+                    updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")
+                        ?.substringBeforeLast("</plugins>")?.trim()
+                }
+                </plugins>
+            """.trimIndent()
+
+                updateFile.writeText(content)
+            }
+
+            println("Plugin verzije $version deploy-ovan (${if (isCI) "na GitHub Pages" else "lokalno"})")
         }
     }
-}
-
-intellijPlatformTesting {
-    runIde {
-        register("runIdeForUiTests") {
-            task {
-                jvmArgumentProviders += CommandLineArgumentProvider {
-                    listOf(
-                        "-Drobot-server.port=8082",
-                        "-Dide.mac.message.dialogs.as.sheets=false",
-                        "-Djb.privacy.policy.text=<!--999.999-->",
-                        "-Djb.consents.confirmation.enabled=false",
-                    )
+    intellijPlatformTesting {
+        runIde {
+            register("runIdeForUiTests") {
+                task {
+                    jvmArgumentProviders += CommandLineArgumentProvider {
+                        listOf(
+                            "-Drobot-server.port=8082",
+                            "-Dide.mac.message.dialogs.as.sheets=false",
+                            "-Djb.privacy.policy.text=<!--999.999-->",
+                            "-Djb.consents.confirmation.enabled=false",
+                        )
+                    }
                 }
-            }
 
-            plugins {
-                robotServerPlugin()
+                plugins {
+                    robotServerPlugin()
+                }
             }
         }
     }

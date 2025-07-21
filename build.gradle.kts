@@ -149,6 +149,45 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
+    // Automatski pravi novi build i deploy-uje plugin
+    register("deployPlugin") {
+        dependsOn("build")
+
+        doLast {
+            val version = project.property("pluginVersion") as String
+            val srcFile = file("build/distributions/nastavnicki-plugin-${version}.zip")
+            val destDir = file("C:/Users/Zarko/mojiPlugins/nastavnicki/")
+
+            copy {
+                from(srcFile)
+                into(destDir)
+            }
+
+            // Ažuriraj updatePlugins.xml
+            val updateFile = file("${destDir}/updatePlugins.xml")
+            val newPluginEntry = """
+            <plugin id="com.raf.nastavnicki"
+                    url="https://github.com/zarko-ned/zarko.github.io/raw/main/nastavnicki/nastavnicki-plugin-${version}.zip"
+                    version="${version}">
+                <name>Nastavnički Plugin - RAF</name>
+                <description>Plugin za nastavnike u IntelliJ-u</description>
+                <idea-version since-build="241.0" until-build="999.*"/>  
+                <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
+            </plugin>
+            """.trimIndent()
+
+            val content = """
+            <plugins>
+                $newPluginEntry
+                ${updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")?.substringBeforeLast("</plugins>")?.trim()}
+            </plugins>
+            """.trimIndent()
+
+            updateFile.writeText(content)
+
+            println("Plugin verzije $version uspešno deploy-ovan u ${destDir}")
+        }
+    }
 }
 
 intellijPlatformTesting {

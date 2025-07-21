@@ -49,13 +49,26 @@ jobs:
           clean: true
 
       - name: Copy plugin files
+        shell: pwsh
         run: |
-          if (!(Test-Path -Path "gh-pages\nastavnicki")) {
-            New-Item -ItemType Directory -Path "gh-pages\nastavnicki" -Force | Out-Null
+          $sourcePath = "${{ github.workspace }}\nastavnicki"
+          $destPath = "${{ github.workspace }}\gh-pages\nastavnicki"
+          
+          Write-Host "Source path: $sourcePath"
+          Write-Host "Destination path: $destPath"
+          
+          if (!(Test-Path -Path $sourcePath)) {
+            Write-Error "Source folder $sourcePath does not exist"
+            exit 1
           }
-          if (Test-Path -Path "nastavnicki\*") {
-            Copy-Item -Path "nastavnicki\*" -Destination "gh-pages\nastavnicki\" -Recurse -Force
+          
+          if (!(Test-Path -Path $destPath)) {
+            New-Item -ItemType Directory -Path $destPath -Force | Out-Null
           }
+          
+          Copy-Item -Path "$sourcePath\*" -Destination $destPath -Recurse -Force
+          Write-Host "Files copied:"
+          Get-ChildItem -Path $destPath
 
       - name: Commit and push changes
         working-directory: gh-pages

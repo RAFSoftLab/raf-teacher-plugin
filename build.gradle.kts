@@ -161,73 +161,64 @@ tasks {
                 throw GradleException("Ne postoji plugin zip fajl: $srcFile")
             }
 
-            if (isCI) {
-                println("CI okruženje: preskačem lokalno kopiranje na C:/Users/...")
-
-                // ✅ Samo ažuriraj `updatePlugins.xml` fajl u projektu, koji će biti push-ovan u GitHub Pages
-                val updateFile = file("nastavnicki/updatePlugins.xml")
-                val newPluginEntry = """
-                <plugin id="com.raf.nastavnicki"
-                        url="https://zarko-ned.github.io/nastavnicki/nastavnicki-plugin-${version}.zip"
-                        version="${version}">
-                    <name>Nastavnički Plugin - RAF</name>
-                    <description>Plugin za nastavnike u IntelliJ-u</description>
-                    <idea-version since-build="241.0" until-build="999.*"/>  
-                    <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
-                </plugin>
-            """.trimIndent()
-
-                val content = """
-                <plugins>
-                    $newPluginEntry
-                    ${
-                    updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")
-                        ?.substringBeforeLast("</plugins>")?.trim()
+            // Definišite osnovne putanje
+            val localDeployDir = file("C:/Users/Zarko/mojiPlugins/nastavnicki/")
+            val updateFile = if (isCI) {
+                // Za CI, koristite privremeni direktorijum
+                file("${project.buildDir}/tmp/nastavnicki/updatePlugins.xml").apply {
+                    parentFile.mkdirs()
+                    if (!exists()) writeText("<plugins></plugins>")
                 }
-                </plugins>
-            """.trimIndent()
-
-                updateFile.writeText(content)
-
-                // Kopiraj plugin zip u folder koji je deo GitHub Pages
-                val destZip = file("nastavnicki/nastavnicki-plugin-${version}.zip")
-                srcFile.copyTo(destZip, overwrite = true)
-
             } else {
-                println("Lokalno okruženje: deploy na C:/Users/Zarko/mojiPlugins")
-                val destDir = file("C:/Users/Zarko/mojiPlugins/nastavnicki/")
-                val updateFile = file("${destDir}/updatePlugins.xml")
-
-                copy {
-                    from(srcFile)
-                    into(destDir)
+                // Za lokalno okruženje, koristite standardnu putanju
+                file("${localDeployDir}/updatePlugins.xml").apply {
+                    parentFile.mkdirs()
+                    if (!exists()) writeText("<plugins></plugins>")
                 }
-
-                val newPluginEntry = """
-                <plugin id="com.raf.nastavnicki"
-                        url="https://github.com/zarko-ned/zarko.github.io/raw/main/nastavnicki/nastavnicki-plugin-${version}.zip"
-                        version="${version}">
-                    <name>Nastavnički Plugin - RAF</name>
-                    <description>Plugin za nastavnike u IntelliJ-u</description>
-                    <idea-version since-build="241.0" until-build="999.*"/>  
-                    <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
-                </plugin>
-            """.trimIndent()
-
-                val content = """
-                <plugins>
-                    $newPluginEntry
-                    ${
-                    updateFile.takeIf { it.exists() }?.readText()?.substringAfter("<plugins>")
-                        ?.substringBeforeLast("</plugins>")?.trim()
-                }
-                </plugins>
-            """.trimIndent()
-
-                updateFile.writeText(content)
             }
 
-            println("Plugin verzije $version deploy-ovan (${if (isCI) "na GitHub Pages" else "lokalno"})")
+            val pluginId = "com.raf.nastavnicki" // Ili "com.raf.nastavnicki" - budite konzistentni
+            val zipFileName = "nastavnicki-plugin-${version}.zip"
+
+            val newPluginEntry = """
+            <plugin id="$pluginId"
+                    url="${if (isCI) "https://zarko-ned.github.io/nastavnicki/$zipFileName"
+            else "https://github.com/zarko-ned/zarko.github.io/raw/main/nastavnicki/$zipFileName"}"
+                    version="$version">
+                <name>Nastavnički Plugin - RAF</name>
+                <description>Plugin za nastavnike u IntelliJ-u</description>
+                <idea-version since-build="241.0" until-build="999.*"/>  
+                <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
+            </plugin>
+        """.trimIndent()
+
+            // Ažurirajte XML sadržaj
+            val existingContent = updateFile.readText()
+            val updatedContent = existingContent
+                .replace(Regex("(<plugin id=\"$pluginId\".*?</plugin>)"), "") // Ukloni postojeću verziju
+                .replace("<plugins>", "<plugins>\n$newPluginEntry") // Dodaj novu verziju
+                .replace("<plugins>\n\n", "<plugins>\n") // Popravi duple nove linije
+
+            updateFile.writeText(updatedContent)
+
+            // Kopiraj ZIP fajl na odgovarajuću lokaciju
+            if (isCI) {
+                println("CI okruženje: ažuriran updatePlugins.xml u privremenom direktorijumu")
+                // Kopiraj u build direktorijum (možete dodati dodatnu logiku za GitHub Pages)
+                val ciDest = file("${project.buildDir}/tmp/nastavnicki/$zipFileName")
+                srcFile.copyTo(ciDest, overwrite = true)
+            } else {
+                println("Lokalno okruženje: deploy na C:/Users/Zarko/mojiPlugins/nastavnicki/")
+                copy {
+                    from(srcFile)
+                    into(localDeployDir)
+                }
+            }
+
+            println("Plugin verzije $version deploy-ovan (${if (isCI) "u CI okruženju" else "lokalno"})")
+            if (isCI) {
+                println("CI NAPOMENA: Morate ručno kopirati fajlove iz ${project.buildDir}/tmp/nastavnicki/ u GitHub Pages repozitorijum")
+            }
         }
     }
     intellijPlatformTesting {

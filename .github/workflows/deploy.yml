@@ -1,87 +1,60 @@
-name: Deploy Plugin
+name: Deploy Plugin to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+    paths:
+      - 'build/distributions/**'
 
 jobs:
   deploy:
-    runs-on: windows-latest  # Koristimo Windows jer si ranije tako radio
-
-    permissions:
-      contents: write  # Da može da pushuje na GitHub Pages
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
-      # Build i deploy plugina (generiše ZIP i updatePlugins.xml)
-      - name: Build and deploy plugin
-        run: ./gradlew deployPlugin
-        env:
-          CI: "true"  # Obaveštava tvoj kod da se izvršava u CI okruženju
-          SERVER_GIT_USERNAME: ${{ secrets.SERVER_GIT_USERNAME }}
-          SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-          HTTP_REPO_URL: ${{ secrets.HTTP_REPO_URL }}
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          REMOTE_SCRIPT_1: ${{ secrets.REMOTE_SCRIPT_1 }}
-          SERVER_SSH_PORT: ${{ secrets.SERVER_SSH_PORT }}
-
-      # 👀 Proveri da li ZIP fajl postoji nakon builda
-      - name: List plugin ZIP output
-        run: Get-ChildItem -Path build\distributions
-
-      - name: List temp plugin output (updatePlugins.xml + zip)
-        run: Get-ChildItem -Path build\tmp\nastavnicki
-
-      # Konfiguriši GIT za commit
-      - name: Configure Git
+      - name: Log current directory and files
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          Write-Host "Listing root folder content:"
+          Get-ChildItem -Recurse
 
-      # Checkout GitHub Pages repozitorijuma
-      - name: Checkout GitHub Pages repo
-        uses: actions/checkout@v4
-        with:
-          repository: zarko-ned/zarko.github.io
-          token: ${{ secrets.GITHUB_TOKEN }}
-          path: gh-pages
-          clean: true
-
-      # 🛠️ Kreiraj folder ako ne postoji (kompatibilno sa PowerShell-om)
-      - name: Ensure gh-pages/nastavnicki folder exists
+      - name: Create target folder (if not exists)
         run: |
-          if (!(Test-Path -Path "gh-pages\nastavnicki")) {
-            New-Item -ItemType Directory -Path "gh-pages\nastavnicki" | Out-Null
+          $path = "gh-pages/nastavnicki"
+          if (!(Test-Path -Path $path)) {
+            New-Item -ItemType Directory -Path $path -Force
+          } else {
+            Write-Host "$path already exists"
           }
 
-      # 📁 Kopiraj ZIP i updatePlugins.xml u GitHub Pages repozitorijum
-      - name: Copy plugin files to gh-pages repo
+      - name: Copy plugin ZIP to target
         run: |
-          Copy-Item -Path "build\tmp\nastavnicki\*" -Destination "gh-pages\nastavnicki" -Recurse -Force
+          Copy-Item "build/distributions/*.zip" "gh-pages/nastavnicki/" -Force
+          Write-Host "Copied ZIPs to gh-pages/nastavnicki"
 
-      # 👀 Ispiši sadržaj destinacije da vidiš da li je kopirano
-      - name: List final files in gh-pages/nastavnicki
-        run: Get-ChildItem -Path "gh-pages\nastavnicki"
-
-      # 📤 Commit i push promena na GitHub Pages
-      - name: Push changes
+      - name: Init Git, commit and push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add .
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
+          
+          # Log what’s staged
+          git diff --cached
+          
+          # Check if there's anything to commit
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "No changes to commit"
+          } else {
             git commit -m "Update plugin version"
-            git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/zarko-ned/zarko.github.io.git main
-          fi
-      
+            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/zarko-ned/zarko.github.io.git main
+          }

@@ -26,6 +26,7 @@ class MyToolWindowFactory : ToolWindowFactory {
     private val commentService = CommentService()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        println(Config.SERVER_USERNAME)
         val selectionListener = SetUpSelectionListener(project, commentService)
         selectionListener.setupEditorListener()
 

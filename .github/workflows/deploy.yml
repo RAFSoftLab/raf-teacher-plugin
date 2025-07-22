@@ -48,31 +48,16 @@ jobs:
           path: gh-pages
           clean: true
 
-      - name: Copy plugin files
-        shell: pwsh
+      - name: Copy plugin ZIP and updatePlugins.xml to gh-pages
         run: |
-          $sourcePath = "${{ github.workspace }}\nastavnicki"
-          $destPath = "${{ github.workspace }}\gh-pages\nastavnicki"
-          
-          Write-Host "Source path: $sourcePath"
-          Write-Host "Destination path: $destPath"
-          
-          if (!(Test-Path -Path $sourcePath)) {
-            Write-Error "Source folder $sourcePath does not exist"
-            exit 1
-          }
-          
-          if (!(Test-Path -Path $destPath)) {
-            New-Item -ItemType Directory -Path $destPath -Force | Out-Null
-          }
-          
-          Copy-Item -Path "$sourcePath\*" -Destination $destPath -Recurse -Force
-          Write-Host "Files copied:"
-          Get-ChildItem -Path $destPath
+          mkdir -p gh-pages/nastavnicki
+          cp build/tmp/nastavnicki/*.zip gh-pages/nastavnicki/
+          cp build/tmp/nastavnicki/updatePlugins.xml gh-pages/nastavnicki/
 
       - name: Commit and push changes
         working-directory: gh-pages
         run: |
+          git add .
           $changedFiles = git status --porcelain
           if ($changedFiles) {
             git add .

@@ -1,60 +1,86 @@
-name: Build and Deploy Plugin
+name: Deploy Plugin to GitHub Pages
 
 on:
   push:
     branches:
-      - main # Pokreće se samo kada pušuješ na main
+      - main  # Pokreće se samo kada se izvrši push na main granu
 
 jobs:
-  build:
-    runs-on: windows-latest # Koristimo Windows jer koristiš PowerShell i lokalne putanje
+  deploy:
+    name: Build and Deploy Plugin
+    runs-on: windows-latest  # Mora biti Windows jer koristiš lokalni folder
 
     steps:
-      # Checkout trenutnog repozitorijuma (plugin)
-      - name: Checkout Plugin Repository
-        uses: actions/checkout@v3
+      # 📁 Kloniraj repozitorijum gde se nalazi plugin kod
+      - name: Checkout plugin repository
+        uses: actions/checkout@v4
 
-      # Instaliraj JDK
+      # 🧰 Postavi JDK
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: 17
-          distribution: temurin
+          distribution: 'temurin'
+          java-version: '17'
 
-      # Build projekta
+      # ⚙️ Gradle build
       - name: Build with Gradle
         run: ./gradlew build
 
-      # Log za potvrdu da je build uspeo
-      - name: Check build folder exists
+      # 📋 Prikaz build artefakata za debug
+      - name: List built files
         run: |
           if (!(Test-Path -Path "build/distributions")) {
             Write-Error "Build folder does not exist!"
+            exit 1
           } else {
+            Write-Output "✅ Build folder found. Listing contents:"
             Get-ChildItem -Recurse build/distributions
           }
-
-      # Checkout GitHub Pages repozitorijuma (zarko.github.io)
-      - name: Checkout GitHub Pages Repository
-        uses: actions/checkout@v3
-        with:
-          repository: zarko-ned/zarko.github.io
-          path: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      # Napravi folder i kopiraj fajlove
-      - name: Copy plugin zip to GitHub Pages
-        run: |
-          mkdir -Force gh-pages/nastavnicki
-          cp -Recurse build/distributions/* gh-pages/nastavnicki/
         shell: pwsh
 
-      # Komituj i pušuj promene
+      # 📂 Kopiraj build u drugi folder (simulacija deploy)
+      - name: Copy build to deploy directory
+        run: |
+          $source = "build/distributions/raf-teacher-plugin.zip"
+          $destination = "C:\\Users\\Zarko\\mojiPlugins\\nastavnicki\\Nastavnički Plugin - RAF-2.0.2.zip"
+
+          if (!(Test-Path $source)) {
+            Write-Error "Zip file not found at: $source"
+            exit 1
+          }
+
+          Write-Output "Copying $source to $destination"
+          Copy-Item -Path $source -Destination $destination -Force
+        shell: pwsh
+
+      # 🌐 Kloniraj zarko.github.io repo
+      - name: Clone GitHub Pages repo
+        run: |
+          git clone https://github.com/zarko-ned/zarko.github.io.git zarko-gh-pages
+        shell: pwsh
+
+      # 📝 Kopiraj fajl u odgovarajući folder
+      - name: Move plugin to GitHub Pages repo
+        run: |
+          $src = "build/distributions/raf-teacher-plugin.zip"
+          $dst = "zarko-gh-pages/nastavnicki/Nastavnički Plugin - RAF-2.0.2.zip"
+
+          if (!(Test-Path $src)) {
+            Write-Error "Build ZIP not found!"
+            exit 1
+          }
+
+          Copy-Item -Path $src -Destination $dst -Force
+          Write-Output "Plugin successfully copied to GitHub Pages repo"
+        shell: pwsh
+
+      # 🚀 Push na zarko.github.io
       - name: Commit and push to GitHub Pages
         run: |
-          cd gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          cd zarko-gh-pages
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git add .
-          git commit -m "Deploy nastavnicki plugin - ${{ github.sha }}"
-          git push
+          git commit -m "🚀 Auto deploy: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/zarko-ned/zarko.github.io.git main
+        shell: pwsh

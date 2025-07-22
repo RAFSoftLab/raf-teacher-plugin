@@ -1,48 +1,60 @@
-name: Deploy Plugin to zarko.github.io
+name: Build and Deploy Plugin
 
 on:
   push:
-    paths:
-      - 'build/distributions/**'
-      - '.github/workflows/deploy.yml'
-      - 'gradle.properties'
     branches:
-      - main
+      - main # Pokreće se samo kada pušuješ na main
 
 jobs:
-  deploy:
-    runs-on: windows-latest
+  build:
+    runs-on: windows-latest # Koristimo Windows jer koristiš PowerShell i lokalne putanje
 
     steps:
-      - name: Checkout plugin repository
+      # Checkout trenutnog repozitorijuma (plugin)
+      - name: Checkout Plugin Repository
         uses: actions/checkout@v3
-        with:
-          persist-credentials: false # važno za ručno podešavanje tokena
 
-      - name: Set up Java
+      # Instaliraj JDK
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
           java-version: 17
+          distribution: temurin
 
-      - name: Prepare deployment folder
-        run: |
-          mkdir -Force ../zarko.github.io/nastavnicki
-          cp -Recurse build/distributions/* ../zarko.github.io/nastavnicki/
+      # Build projekta
+      - name: Build with Gradle
+        run: ./gradlew build
 
-      - name: Clone GitHub Pages repo
+      # Log za potvrdu da je build uspeo
+      - name: Check build folder exists
         run: |
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/zarko-ned/zarko.github.io.git ../zarko.github.io
+          if (!(Test-Path -Path "build/distributions")) {
+            Write-Error "Build folder does not exist!"
+          } else {
+            Get-ChildItem -Recurse build/distributions
+          }
 
-      - name: Commit and push to zarko.github.io
+      # Checkout GitHub Pages repozitorijuma (zarko.github.io)
+      - name: Checkout GitHub Pages Repository
+        uses: actions/checkout@v3
+        with:
+          repository: zarko-ned/zarko.github.io
+          path: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # Napravi folder i kopiraj fajlove
+      - name: Copy plugin zip to GitHub Pages
         run: |
-          cd ../zarko.github.io
+          mkdir -Force gh-pages/nastavnicki
+          cp -Recurse build/distributions/* gh-pages/nastavnicki/
+        shell: pwsh
+
+      # Komituj i pušuj promene
+      - name: Commit and push to GitHub Pages
+        run: |
+          cd gh-pages
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add nastavnicki
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update plugin version"
-            git push origin main
-          fi
+          git add .
+          git commit -m "Deploy nastavnicki plugin - ${{ github.sha }}"
+          git push

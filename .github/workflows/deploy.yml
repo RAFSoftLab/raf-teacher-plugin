@@ -1,60 +1,48 @@
-name: Deploy Plugin to GitHub Pages
+name: Deploy Plugin to zarko.github.io
 
 on:
   push:
-    branches:
-      - main
     paths:
       - 'build/distributions/**'
+      - '.github/workflows/deploy.yml'
+      - 'gradle.properties'
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout plugin repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false # važno za ručno podešavanje tokena
 
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Log current directory and files
+      - name: Prepare deployment folder
         run: |
-          Write-Host "Listing root folder content:"
-          Get-ChildItem -Recurse
+          mkdir -Force ../zarko.github.io/nastavnicki
+          cp -Recurse build/distributions/* ../zarko.github.io/nastavnicki/
 
-      - name: Create target folder (if not exists)
+      - name: Clone GitHub Pages repo
         run: |
-          $path = "gh-pages/nastavnicki"
-          if (!(Test-Path -Path $path)) {
-            New-Item -ItemType Directory -Path $path -Force
-          } else {
-            Write-Host "$path already exists"
-          }
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/zarko-ned/zarko.github.io.git ../zarko.github.io
 
-      - name: Copy plugin ZIP to target
+      - name: Commit and push to zarko.github.io
         run: |
-          Copy-Item "build/distributions/*.zip" "gh-pages/nastavnicki/" -Force
-          Write-Host "Copied ZIPs to gh-pages/nastavnicki"
-
-      - name: Init Git, commit and push
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add .
-          
-          # Log what’s staged
-          git diff --cached
-          
-          # Check if there's anything to commit
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "No changes to commit"
-          } else {
+          cd ../zarko.github.io
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add nastavnicki
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
             git commit -m "Update plugin version"
-            git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/zarko-ned/zarko.github.io.git main
-          }
+            git push origin main
+          fi

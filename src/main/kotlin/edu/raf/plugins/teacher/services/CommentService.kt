@@ -1,5 +1,6 @@
 package edu.raf.plugins.teacher.services
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.models.Comment
@@ -10,7 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.security.MessageDigest
-
+@Service(Service.Level.PROJECT)
 class CommentService : Publisher {
     private val jsonFormat = Json { ignoreUnknownKeys = true }
     private val subscribers = mutableListOf<Subscriber>()

@@ -23,11 +23,14 @@ import javax.swing.JButton
 import javax.swing.JPanel
 
 class MyToolWindowFactory : ToolWindowFactory {
-    private val commentService = CommentService()
+
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val selectionListener = SetUpSelectionListener(project, commentService)
+        println("Postavicu listener")
+        val commentService = project.getService(CommentService::class.java)
+        val selectionListener = SetUpSelectionListener.getInstance(project)
         selectionListener.setupEditorListener()
+
 
         val cardLayout = CardLayout()
         val mainPanel = JPanel(cardLayout)

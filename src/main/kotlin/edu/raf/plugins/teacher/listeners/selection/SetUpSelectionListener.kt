@@ -1,5 +1,6 @@
 package edu.raf.plugins.teacher.listeners.selection
 
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.SelectionEvent
 import com.intellij.openapi.editor.event.SelectionListener
@@ -21,12 +22,20 @@ import java.awt.Image
 import java.net.URL
 import javax.swing.*
 
-class SetUpSelectionListener(private val project: Project, private val commentService: CommentService)  {
+@Service(Service.Level.PROJECT)
+class SetUpSelectionListener(private val project: Project) {
+
+    private val commentService: CommentService = project.getService(CommentService::class.java)
     private var currentPopup: com.intellij.openapi.ui.popup.JBPopup? = null
 
-
+    companion object {
+        fun getInstance(project: Project): SetUpSelectionListener {
+            return project.getService(SetUpSelectionListener::class.java)
+        }
+    }
 
     fun setupEditorListener() {
+        println("Postavljen listener")
         project.messageBus.connect().subscribe(
             FileEditorManagerListener.FILE_EDITOR_MANAGER,
             object : FileEditorManagerListener {

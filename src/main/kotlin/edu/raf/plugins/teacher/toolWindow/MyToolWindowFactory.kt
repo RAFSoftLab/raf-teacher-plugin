@@ -1,6 +1,6 @@
 package edu.raf.plugins.teacher.toolWindow
 
-import ai.grazie.detector.ngram.main
+
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory

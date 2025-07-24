@@ -155,8 +155,9 @@ class CommentService : Publisher {
 
             // Add the new comment
             val updatedComments = existingComments + newComment
-
-            notifySubscribers(updatedComments)
+            // Filter before notifying
+            val projectComments = updatedComments.filter { it.matchesProject(project) }
+            notifySubscribers(projectComments)
 
             // Write updated comments back to the file
             logFile.writeText(jsonFormat.encodeToString(updatedComments))

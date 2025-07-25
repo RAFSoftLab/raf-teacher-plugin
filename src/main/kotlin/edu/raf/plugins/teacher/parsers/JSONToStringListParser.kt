@@ -1,5 +1,6 @@
 package edu.raf.plugins.teacher.parsers
 
+import io.sentry.Sentry
 import org.json.JSONArray
 import org.json.JSONException
 
@@ -11,6 +12,7 @@ class JSONToStringListParser : IParser<String> {
                 jsonArray.getString(i) // Vraća samo stringove umesto Subject objekata
             }
         } catch (e: JSONException) {
+            Sentry.captureException(e)
             // Ako dođe do greške, vraća praznu listu stringova
             emptyList<String>()
         }

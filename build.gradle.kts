@@ -2,6 +2,7 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
+
 plugins {
     id("java") // Java support
     alias(libs.plugins.kotlin) // Kotlin support
@@ -9,9 +10,19 @@ plugins {
     alias(libs.plugins.changelog) // Gradle Changelog Plugin
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25" // Ažurirana verzija
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25"
+    id("io.sentry.jvm.gradle") version "3.14.0" // Updated to stable version
 }
 
+// Load environment variables environment variables using Java's built-in properties
+val env: Map<String, String> = System.getenv()
+
+sentry {
+    includeSourceContext.set(true)
+    org.set("raf-2p")
+    projectName.set("teacher-plugin")
+    authToken.set(env["SENTRY_AUTH_TOKEN"])
+}
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
@@ -58,7 +69,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.2.6") //Logovi
     implementation("com.jcraft:jsch:0.1.55") //JCraft
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") // Ažurirana verzija JSON to Class serijalizacija
-
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")// Dot ENV
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html
@@ -169,6 +180,7 @@ intellijPlatformTesting {
             plugins {
                 robotServerPlugin()
             }
+
         }
     }
 }

@@ -9,6 +9,7 @@ import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.CreateExamView
+import io.sentry.Sentry
 import java.awt.CardLayout
 import javax.swing.JOptionPane
 import javax.swing.JPanel
@@ -38,6 +39,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
                     val subjects = get() // Rezultat poziva
                     view.updateSubjects(subjects)
                 } catch (e: Exception) {
+                    Sentry.captureException(e)
                     JOptionPane.showMessageDialog(
                         null,
                         "Nije moguće povezati se na server. Proverite Vašu mrežnu i VPN konekciju.",
@@ -98,6 +100,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
                     Utils.pushCurrentProject(remoteURL, "main", "test")
 
                 } catch (e: Exception) {
+                    Sentry.captureException(e)
                     e.printStackTrace()
                     errorMessage = "Došlo je do greške prilikom kreiranja provere: ${e.message}"
                 }

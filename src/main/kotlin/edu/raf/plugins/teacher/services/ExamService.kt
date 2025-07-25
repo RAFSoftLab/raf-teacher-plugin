@@ -5,6 +5,7 @@ import edu.raf.plugins.teacher.utils.ConfigLoader
 import org.json.JSONObject
 import java.io.IOException
 import edu.raf.plugins.teacher.models.Directory
+import io.sentry.Sentry
 
 class ExamService {
 
@@ -48,7 +49,9 @@ class ExamService {
                 gitInitialized = gitInitialized
             )
         } catch (e: Exception) {
+            Sentry.captureException(e)
             throw IOException("Greška pri parsiranju odgovora: ${e.message}", e)
+
         }
     }
 }

@@ -6,11 +6,13 @@ import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.models.Comment
 import edu.raf.plugins.teacher.observer.Publisher
 import edu.raf.plugins.teacher.observer.Subscriber
+import io.sentry.Sentry
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.security.MessageDigest
+
 @Service(Service.Level.PROJECT)
 class CommentService : Publisher {
     private val jsonFormat = Json { ignoreUnknownKeys = true }
@@ -33,9 +35,11 @@ class CommentService : Publisher {
                     comment.copy()
                 }
             } catch (e: SerializationException) {
+                Sentry.captureException(e)
                 println("Greška pri parsiranju komentara: ${e.message}")
                 emptyList()
             } catch (e: Exception) {
+                Sentry.captureException(e)
                 println("Greška pri čitanju fajla: ${e.message}")
                 emptyList()
             }
@@ -69,9 +73,11 @@ class CommentService : Publisher {
             // Return only comments for the current project
             updatedComments.filter { it.matchesProject(project) }
         } catch (e: SerializationException) {
+            Sentry.captureException(e)
             println("Greška pri parsiranju komentara: ${e.message}")
             emptyList()
         } catch (e: Exception) {
+            Sentry.captureException(e)
             println("Greška pri radu sa fajlom: ${e.message}")
             emptyList()
         }
@@ -108,9 +114,11 @@ class CommentService : Publisher {
             // Return only comments matching the current project
             updatedComments.filter { it.matchesProject(project) }
         } catch (e: SerializationException) {
+            Sentry.captureException(e)
             println("Greška pri parsiranju komentara: ${e.message}")
             emptyList()
         } catch (e: Exception) {
+            Sentry.captureException(e)
             println("Greška pri radu sa fajlom: ${e.message}")
             emptyList()
         }
@@ -164,9 +172,11 @@ class CommentService : Publisher {
 
             true
         } catch (e: SerializationException) {
+            Sentry.captureException(e)
             println("Error parsing comments: ${e.message}")
             false
         } catch (e: Exception) {
+            Sentry.captureException(e)
             println("Error working with file: ${e.message}")
             false
         }

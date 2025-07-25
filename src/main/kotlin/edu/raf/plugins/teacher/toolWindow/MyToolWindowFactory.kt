@@ -15,6 +15,8 @@ import edu.raf.plugins.teacher.ui.CommentsView
 import edu.raf.plugins.teacher.ui.CreateExamView
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
+import io.sentry.Sentry
+
 import java.awt.CardLayout
 import java.awt.Image
 import java.net.URL
@@ -26,7 +28,13 @@ class MyToolWindowFactory : ToolWindowFactory {
 
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        println("Postavicu listener")
+
+        Sentry.init { options ->
+            options.dsn = "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
+            options.isDebug = true // Omogućava debug mod
+        }
+
+        ("Postavicu listener")
         val commentService = project.getService(CommentService::class.java)
         val selectionListener = SetUpSelectionListener.getInstance(project)
         selectionListener.setupEditorListener()

@@ -7,6 +7,7 @@ import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.services.SubjectService
 import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.Utils.Companion.openDownloadedProject;
+import io.sentry.Sentry
 import java.awt.CardLayout
 import java.io.File
 import javax.swing.*
@@ -38,6 +39,7 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                     view.updateOptions(subjectsOnServer)
                     // view.updateSubjects(subjects)
                 } catch (e: Exception) {
+                    Sentry.captureException(e)
                     JOptionPane.showMessageDialog(
                         null,
                         "Nije moguće povezati se na server. Proverite Vašu mrežnu i VPN konekciju.",
@@ -127,6 +129,7 @@ class StudentSolutionsController(private val view: GetStudentSolutionsView) : St
                     view.updateOptions(data)
                     // view.updateSubjects(subjects)
                 } catch (e: Exception) {
+                    Sentry.captureException(e)
                     JOptionPane.showMessageDialog(
                         null,
                         "Greška: ${e.message}.",

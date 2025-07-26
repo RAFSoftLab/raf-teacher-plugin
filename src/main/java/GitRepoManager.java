@@ -2,6 +2,7 @@ import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.SftpException;
+import io.sentry.Sentry;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -39,6 +40,7 @@ public class GitRepoManager {
                     .call();
             System.out.println("Repository cloned successfully to: " + localPath);
         } catch (GitAPIException e) {
+            Sentry.captureException(e);
             System.err.println("Error cloning repository: " + e.getMessage());
             throw new RuntimeException("Failed to clone repository", e);
         }
@@ -78,6 +80,7 @@ public class GitRepoManager {
 
             System.out.println("Changes pushed successfully");
         } catch (IOException | GitAPIException e) {
+            Sentry.captureException(e);
             System.err.println("Error pushing to repository: " + e.getMessage());
             throw new RuntimeException("Failed to push changes", e);
         }
@@ -139,6 +142,7 @@ public class GitRepoManager {
             System.out.println("IntelliJ project created. You can now open " + localBaseDir + " as a project in IntelliJ IDEA");
 
         } catch (Exception e) {
+            Sentry.captureException(e);
             System.err.println("Error downloading student work: " + e.getMessage());
             e.printStackTrace();
         }
@@ -197,6 +201,7 @@ public class GitRepoManager {
             Files.write(new File(ideaDir, "modules.xml").toPath(), modulesXml.getBytes());
 
         } catch (IOException e) {
+            Sentry.captureException(e);
             e.printStackTrace();
         }
     }

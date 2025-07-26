@@ -1,3 +1,4 @@
+import io.sentry.Sentry;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
@@ -41,6 +42,7 @@ public class GitInitPush {
 
             System.out.println("Push to repository completed successfully.");
         } catch (GitAPIException  | URISyntaxException e) {
+            Sentry.captureException(e);
             System.err.println("Error pushing to repository: " + e.getMessage());
         }
     }

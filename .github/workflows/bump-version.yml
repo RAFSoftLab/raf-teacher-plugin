@@ -1,33 +1,33 @@
-name: Bump Plugin Version
+- name: Bump patch version
+  run: |
+    echo "Current gradle.properties content:"
+    cat gradle.properties
+    echo ""
 
-on:
-  push:
-    branches: [main]
+    python -c "
+    import re
+    path = 'gradle.properties'
+    
+    print(f'Reading file: {path}')
+    with open(path) as f:
+      lines = f.readlines()
+      print('Original lines:', lines)
+    
+    for i, line in enumerate(lines):
+      if line.strip().startswith('pluginVersion'):
+        print(f'Found version line at index {i}: {line.strip()}')
+        v = re.findall(r'(\d+)\.(\d+)\.(\d+)', line)[0]
+        print(f'Current version: {v}')
+        new = f'{v[0]}.{v[1]}.{int(v[2])+1}'
+        lines[i] = f'pluginVersion = {new}\n'
+        print(f'New version: {new}')
+    
+    print('Modified lines:', lines)
+    with open(path, 'w') as f:
+      f.writelines(lines)
+    print('File updated successfully')
+    "
 
-jobs:
-  bump-version:
-    runs-on: ubuntu-latest
-
-    # Eksplicitno podesite permissions
-    permissions:
-      contents: write  # Dozvola za push
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-
-      - name: Bump patch version
-        run: |
-          python -c "..."
-
-      - name: Commit and push changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'Bump pluginVersion after push to main'
-          branch: main
-          # Eksplicitno koristite GITHUB_TOKEN
-          token: ${{ secrets.GITHUB_TOKEN }}
+    echo ""
+    echo "Updated gradle.properties content:"
+    cat gradle.properties

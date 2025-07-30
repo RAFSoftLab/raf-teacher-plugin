@@ -1,16 +1,18 @@
-name: Build and Deploy IntelliJ Plugin
+name: Build and Deploy Plugin
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: ["Bump Plugin Version"]
+    types:
+      - completed
 
 jobs:
   build-and-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Set up JDK
@@ -19,13 +21,18 @@ jobs:
           distribution: 'temurin'
           java-version: 17
 
+      - name: Generate Config.java
+        run: |
+          mkdir -p src/main/java/edu/raf/plugins/teacher/config
+          echo "${{ secrets.CONFIG_JAVA_CONTENT }}" > src/main/java/edu/raf/plugins/teacher/config/Config.java
+
       - name: Grant execute permission to Gradle
         run: chmod +x ./gradlew
 
-      - name: Build plugin
+      - name: Build Plugin
         run: ./gradlew buildPlugin
 
-      - name: Copy plugin to remote server
+      - name: Upload to Server
         uses: appleboy/scp-action@v0.1.6
         with:
           host: ${{ secrets.REMOTE_HOST }}

@@ -3,7 +3,6 @@
 .intellijPlatform
 .qodana
 build
-src/main/java/Config.java
 src/main/resources/config.properties
 .env
 

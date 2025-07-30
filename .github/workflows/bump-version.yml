@@ -1,0 +1,62 @@
+name: Bump Plugin Version
+
+on:
+  push:
+    branches: [main]  # Trigger this workflow only on pushes to main branch
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+      # Step 1: Checkout the repository code
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for git-auto-commit to work properly
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'  # Use latest stable Python 3 version
+
+      # Step 3: Automatically bump the patch version in gradle.properties
+      - name: Bump patch version
+        run: |
+          python -c "
+          import re
+          
+          # Path to the version file
+          path = 'gradle.properties'
+          
+          # Read the current file content
+          with open(path) as f:
+            lines = f.readlines()
+          
+          # Find and update the version line
+          for i, line in enumerate(lines):
+            if line.startswith('pluginVersion'):
+              # Extract version numbers using regex
+              v = re.findall(r'(\d+)\.(\d+)\.(\d+)', line)[0]
+          
+              # Increment patch version (last number)
+              new_version = f'{v[0]}.{v[1]}.{int(v[2])+1}'
+          
+              # Update the line with new version
+              lines[i] = f'pluginVersion = {new_version}\n'
+          
+          # Write the updated content back to file
+          with open(path, 'w') as f:
+            f.writelines(lines)
+          "
+
+      # Step 4: Commit and push the version bump automatically
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'Bump pluginVersion after push to main'
+          branch: main
+          # These options ensure the action has proper git config
+          commit_user_name: 'GitHub Actions'
+          commit_user_email: 'actions@github.com'
+          commit_author: 'GitHub Actions <actions@github.com>'

@@ -28,7 +28,7 @@ class MyToolWindowFactory : ToolWindowFactory {
 
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-
+ //2.1.9 verzija
         Sentry.init { options ->
             options.dsn = "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
             options.isDebug = true // Omogućava debug mod

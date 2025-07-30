@@ -1,6 +1,8 @@
-name: Build and Deploy Plugin
+name: Build and Deploy IntelliJ Plugin
 
 on:
+  push:
+    branches: [main]
   workflow_run:
     workflows: ["Bump Plugin Version"]
     types:
@@ -12,31 +14,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 17
 
-      - name: Generate Config.java
+      - name: Recreate Config.java
         run: |
-          mkdir -p src/main/java/edu/raf/plugins/teacher/config
-          echo "${{ secrets.CONFIG_JAVA_CONTENT }}" > src/main/java/edu/raf/plugins/teacher/config/Config.java
+          mkdir -p src/main/java
+          echo "${{ secrets.CONFIG_JAVA_CONTENT }}" > src/main/java/Config.java
 
-      - name: Grant execute permission to Gradle
+      - name: Grant execute permissions to gradlew
         run: chmod +x ./gradlew
 
-      - name: Build Plugin
+      - name: Build plugin
         run: ./gradlew buildPlugin
 
-      - name: Upload to Server
-        uses: appleboy/scp-action@v0.1.6
+      - name: Copy plugin to remote server
+        uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: build/distributions/*.zip
-          target: ${{ secrets.REMOTE_PATH }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          source: "build/distributions/*.zip"
+          target: "/var/www/intellij-plugins/"

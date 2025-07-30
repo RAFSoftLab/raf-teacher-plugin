@@ -23,7 +23,7 @@ class SubjectExamController(private val view: CreateExamView) : ExamViewListener
 
     private val subjectService = SubjectService()
     private val examService = ExamService()
-
+//
     fun loadSubjects() {
         view.showLoader(true)  // Prikazivanje loadera
         object : SwingWorker<List<Subject>, Void>() {

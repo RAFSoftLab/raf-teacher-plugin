@@ -10,13 +10,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SERVER_GIT_USERNAME: ${{ secrets.SERVER_GIT_USERNAME }}
-      SERVER_USERNAME: ${{ secrets.SERVER_USERNAME }}
-      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-      HTTP_REPO_URL: ${{ secrets.HTTP_REPO_URL }}
-      SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      REMOTE_SCRIPT_1: ${{ secrets.REMOTE_SCRIPT_1 }}
-      SERVER_SSH_PORT: ${{ secrets.SERVER_SSH_PORT }}
+      PRODUCTION_SERVER_USERNAME: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
+      PRODUCTION_SERVER_PASSWORD: ${{ secrets.PRODUCTION_SERVER_PASSWORD }}
+      PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
     steps:
       - uses: actions/checkout@v3
       - name: Build plugin
@@ -24,10 +20,9 @@ jobs:
       - name: Copy build to server
         uses: appleboy/scp-action@v0.1.5
         with:
-          host: ${{ env.SERVER_HOST }}
-          username: ${{ env.SERVER_USERNAME }}
-          password: ${{ env.SERVER_PASSWORD }}
-          port: ${{ env.SERVER_SSH_PORT }}
+          host: ${{ env.PRODUCTION_SERVER_HOST }}
+          username: ${{ env.PRODUCTION_SERVER_USERNAME }}
+          password: ${{ env.PRODUCTION_SERVER_PASSWORD }}
           source: build/distributions/*.zip
           target: /var/www/intellij-plugins/
       # - name: Run remote deploy script (optional)

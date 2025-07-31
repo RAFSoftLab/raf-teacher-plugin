@@ -38,13 +38,42 @@ jobs:
             LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
             VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
             PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
-            
+
+            # Provera i kreiranje osnovnog XML-a ako ne postoji
+            if [ ! -s /var/www/intellij-plugins/updatePlugins.xml ]; then
+              cat > /var/www/intellij-plugins/updatePlugins.xml << 'EOF'
+              <plugins>
+              </plugins>
+              EOF
+            fi
+
+            # Privremeni fajl za sigurnosnu kopiju
+            cp /var/www/intellij-plugins/updatePlugins.xml /tmp/update_backup.xml
+
+            # Ažuriranje XML-a
             xmlstarlet ed \
               --subnode "/plugins" --type elem -n "plugin" -v "" \
               --insert "/plugins/plugin[last()]" --type attr -n "id" -v "com.raf.nastavnicki" \
               --insert "/plugins/plugin[last()]" --type attr -n "url" -v "$PLUGIN_URL" \
               --insert "/plugins/plugin[last()]" --type attr -n "version" -v "$VERSION" \
-              ... # Ostale XML komande ostaju iste
-            /var/www/intellij-plugins/updatePlugins.xml > /tmp/update_temp.xml
-            
-            mv /tmp/update_temp.xml /var/www/intellij-plugins/updatePlugins.xml
+              --subnode "/plugins/plugin[last()]" --type elem -n "name" -v "Nastavnički Plugin - RAF" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "description" -v "Plugin za nastavnike u IntelliJ-u" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "idea-version" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "since-build" -v "241.0" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "until-build" -v "999.*" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "vendor" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "email" -v "zarkoned@outlook.com" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "url" -v "https://raf.edu.rs" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "icon" \
+              --insert "/plugins/plugin[last()]/icon" --type attr -n "url" -v "http://157.180.37.247/pluginIcon.svg" \
+              /var/www/intellij-plugins/updatePlugins.xml > /tmp/update_temp.xml
+
+            # Provera da li je ažuriranje uspešno pre nego što zamenimo original
+            if [ -s /tmp/update_temp.xml ]; then
+              mv /tmp/update_temp.xml /var/www/intellij-plugins/updatePlugins.xml
+              echo "XML uspešno ažuriran"
+            else
+              echo "Greška pri ažuriranju XML-a, vraćanje na backup"
+              mv /tmp/update_backup.xml /var/www/intellij-plugins/updatePlugins.xml
+              exit 1
+            fi

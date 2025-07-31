@@ -38,18 +38,18 @@ jobs:
             LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
             VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
             PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
-
+            
             # Provera i kreiranje osnovnog XML-a ako ne postoji
             if [ ! -s /var/www/intellij-plugins/updatePlugins.xml ]; then
-              cat > /var/www/intellij-plugins/updatePlugins.xml << 'EOF'
+              cat <<EOF > /var/www/intellij-plugins/updatePlugins.xml
               <plugins>
               </plugins>
               EOF
             fi
-
+            
             # Privremeni fajl za sigurnosnu kopiju
             cp /var/www/intellij-plugins/updatePlugins.xml /tmp/update_backup.xml
-
+            
             # Ažuriranje XML-a
             xmlstarlet ed \
               --subnode "/plugins" --type elem -n "plugin" -v "" \
@@ -67,8 +67,8 @@ jobs:
               --subnode "/plugins/plugin[last()]" --type elem -n "icon" \
               --insert "/plugins/plugin[last()]/icon" --type attr -n "url" -v "http://157.180.37.247/pluginIcon.svg" \
               /var/www/intellij-plugins/updatePlugins.xml > /tmp/update_temp.xml
-
-            # Provera da li je ažuriranje uspešno pre nego što zamenimo original
+            
+            # Provera da li je ažuriranje uspešno
             if [ -s /tmp/update_temp.xml ]; then
               mv /tmp/update_temp.xml /var/www/intellij-plugins/updatePlugins.xml
               echo "XML uspešno ažuriran"

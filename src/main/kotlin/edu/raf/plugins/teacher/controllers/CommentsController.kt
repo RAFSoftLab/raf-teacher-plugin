@@ -24,7 +24,7 @@ class CommentsController(private val view: CommentsView,  private val project: P
         val comments = commentService.loadCommentsForCurrentProject(project)
         view.updateComments(comments)
     }
-
+ // Bzvz commit za novu verziju
     override fun onEditComment(comment: Comment) {
         val dialog = JDialog().apply {
             title = "Izmena komentara"

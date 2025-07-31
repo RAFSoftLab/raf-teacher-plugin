@@ -15,8 +15,10 @@ jobs:
       PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
     steps:
       - uses: actions/checkout@v3
+
       - name: Build plugin
         run: ./gradlew buildPlugin
+
       - name: Copy build to server
         uses: appleboy/scp-action@v0.1.5
         with:
@@ -24,12 +26,45 @@ jobs:
           username: ${{ env.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: build/distributions/*.zip
-          target: /var/www/intellij-plugins/
-      # - name: Run remote deploy script (optional)
-      #   uses: appleboy/ssh-action@v0.1.7
-      #   with:
-      #     host: ${{ env.SERVER_HOST }}
-      #     username: ${{ env.SERVER_USERNAME }}
-      #     password: ${{ env.SERVER_PASSWORD }}
-      #     port: ${{ env.SERVER_SSH_PORT }}
-      #     script: ${{ env.REMOTE_SCRIPT_1 }}
+          target: /var/www/intellij-plugins/build/distributions/
+
+      - name: Update updatePlugins.xml
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_SERVER_HOST }}
+          username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Pronađi najnoviji ZIP fajl
+            LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
+            
+            # Ekstrahuj verziju (ispravka za grešku u varijabli: LATEST_ZIP umesto LATEST_ZIP)
+            VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
+            
+            # URL za novi plugin
+            PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
+            
+            # Privremeni XML fajl
+            TEMP_XML="/tmp/updatePlugins_temp.xml"
+            
+            # Ažuriraj XML
+            xmlstarlet ed \
+              --subnode "/plugins" --type elem -n "plugin" -v "" \
+              --insert "/plugins/plugin[last()]" --type attr -n "id" -v "com.raf.nastavnicki" \
+              --insert "/plugins/plugin[last()]" --type attr -n "url" -v "$PLUGIN_URL" \
+              --insert "/plugins/plugin[last()]" --type attr -n "version" -v "$VERSION" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "name" -v "Nastavnički Plugin - RAF" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "description" -v "Plugin za nastavnike u IntelliJ-u" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "idea-version" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "since-build" -v "241.0" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "until-build" -v "999.*" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "vendor" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "email" -v "zarkoned@outlook.com" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "url" -v "https://raf.edu.rs" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "icon" \
+              --insert "/plugins/plugin[last()]/icon" --type attr -n "url" -v "http://157.180.37.247/pluginIcon.svg" \
+              /var/www/intellij-plugins/updatePlugins.xml > "$TEMP_XML"
+            
+            # Zameni originalni fajl
+            mv "$TEMP_XML" /var/www/intellij-plugins/updatePlugins.xml
+            rm -f "$TEMP_XML"

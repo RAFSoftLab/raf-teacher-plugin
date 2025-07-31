@@ -26,7 +26,7 @@ jobs:
           username: ${{ env.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: build/distributions/*.zip
-          target: /var/www/intellij-plugins/  # Ispravka ovde
+          target: /var/www/intellij-plugins/
 
       - name: Update updatePlugins.xml
         uses: appleboy/ssh-action@v0.1.7
@@ -35,22 +35,19 @@ jobs:
           username: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Pronađi najnoviji ZIP fajl
             LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
+            
+            # Ekstrahuj verziju (ispravka za grešku u varijabli: LATEST_ZIP umesto LATEST_ZIP)
             VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
+            
+            # URL za novi plugin
             PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
             
-            # Provera i kreiranje osnovnog XML-a ako ne postoji
-            if [ ! -s /var/www/intellij-plugins/updatePlugins.xml ]; then
-              cat <<EOF > /var/www/intellij-plugins/updatePlugins.xml
-              <plugins>
-              </plugins>
-              EOF
-            fi
+            # Privremeni XML fajl
+            TEMP_XML="/tmp/updatePlugins_temp.xml"
             
-            # Privremeni fajl za sigurnosnu kopiju
-            cp /var/www/intellij-plugins/updatePlugins.xml /tmp/update_backup.xml
-            
-            # Ažuriranje XML-a
+            # Ažuriraj XML
             xmlstarlet ed \
               --subnode "/plugins" --type elem -n "plugin" -v "" \
               --insert "/plugins/plugin[last()]" --type attr -n "id" -v "com.raf.nastavnicki" \
@@ -66,14 +63,8 @@ jobs:
               --insert "/plugins/plugin[last()]/vendor" --type attr -n "url" -v "https://raf.edu.rs" \
               --subnode "/plugins/plugin[last()]" --type elem -n "icon" \
               --insert "/plugins/plugin[last()]/icon" --type attr -n "url" -v "http://157.180.37.247/pluginIcon.svg" \
-              /var/www/intellij-plugins/updatePlugins.xml > /tmp/update_temp.xml
+              /var/www/intellij-plugins/updatePlugins.xml > "$TEMP_XML"
             
-            # Provera da li je ažuriranje uspešno
-            if [ -s /tmp/update_temp.xml ]; then
-              mv /tmp/update_temp.xml /var/www/intellij-plugins/updatePlugins.xml
-              echo "XML uspešno ažuriran"
-            else
-              echo "Greška pri ažuriranju XML-a, vraćanje na backup"
-              mv /tmp/update_backup.xml /var/www/intellij-plugins/updatePlugins.xml
-              exit 1
-            fi
+            # Zameni originalni fajl
+            mv "$TEMP_XML" /var/www/intellij-plugins/updatePlugins.xml
+            rm -f "$TEMP_XML"

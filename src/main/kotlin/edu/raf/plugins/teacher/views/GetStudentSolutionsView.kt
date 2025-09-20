@@ -1,4 +1,4 @@
-package edu.raf.plugins.teacher.ui
+package edu.raf.plugins.teacher.views
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.listeners.StepNavigationListener
@@ -231,14 +231,16 @@ class GetStudentSolutionsView : JPanel() {
 
 
                 if (selectedSolution is StudentSolution) {
-                   //
+                    //
                     showFileChooseForStudentSolution(selectedSolution)
                 } else {
                     JOptionPane.showMessageDialog(
-                        null, "Greška: Očekivan StudentSolution, dobijen ${selectedSolution?.javaClass?.simpleName}", "Greška", JOptionPane.ERROR_MESSAGE
+                        null,
+                        "Greška: Očekivan StudentSolution, dobijen ${selectedSolution?.javaClass?.simpleName}",
+                        "Greška",
+                        JOptionPane.ERROR_MESSAGE
                     )
                 }
-
 
 
             }

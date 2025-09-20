@@ -2,10 +2,10 @@ package edu.raf.plugins.teacher.services
 
 import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.models.Subject
-import edu.raf.plugins.teacher.parsers.IParser
-import edu.raf.plugins.teacher.parsers.JSONToStringListParser
-import edu.raf.plugins.teacher.parsers.StudentSolutionParser
-import edu.raf.plugins.teacher.parsers.SubjectParser
+import edu.raf.plugins.teacher.responseparsers.IParser
+import edu.raf.plugins.teacher.responseparsers.JSONToStringListParser
+import edu.raf.plugins.teacher.responseparsers.StudentSolutionParser
+import edu.raf.plugins.teacher.responseparsers.SubjectParser
 import edu.raf.plugins.teacher.utils.ApiClient
 import edu.raf.plugins.teacher.utils.ConfigLoader
 import java.io.IOException

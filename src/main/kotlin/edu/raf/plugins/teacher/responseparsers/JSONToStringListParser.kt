@@ -1,4 +1,4 @@
-package edu.raf.plugins.teacher.parsers
+package edu.raf.plugins.teacher.responseparsers
 
 import io.sentry.Sentry
 import org.json.JSONArray

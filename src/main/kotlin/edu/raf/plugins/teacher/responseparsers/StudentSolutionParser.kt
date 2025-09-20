@@ -1,7 +1,6 @@
-package edu.raf.plugins.teacher.parsers
+package edu.raf.plugins.teacher.responseparsers
 
 import edu.raf.plugins.teacher.models.StudentSolution
-import kotlinx.serialization.json.Json
 import org.json.JSONArray
 
 class StudentSolutionParser : IParser<StudentSolution> {

@@ -5,7 +5,7 @@ import edu.raf.plugins.teacher.listeners.StepNavigationListener
 import edu.raf.plugins.teacher.listeners.StudentSolutionsListener
 import edu.raf.plugins.teacher.models.StudentSolution
 import edu.raf.plugins.teacher.services.SubjectService
-import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
+import edu.raf.plugins.teacher.views.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.Utils.Companion.openDownloadedProject;
 import io.sentry.Sentry
 import java.awt.CardLayout

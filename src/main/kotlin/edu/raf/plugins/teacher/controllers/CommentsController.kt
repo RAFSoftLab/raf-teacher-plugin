@@ -5,7 +5,7 @@ import edu.raf.plugins.teacher.listeners.DeleteCommentListener
 import edu.raf.plugins.teacher.listeners.EditCommentListener
 import edu.raf.plugins.teacher.models.Comment
 import edu.raf.plugins.teacher.services.CommentService
-import edu.raf.plugins.teacher.ui.CommentsView
+import edu.raf.plugins.teacher.views.CommentsView
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import javax.swing.*

@@ -1,12 +1,9 @@
-package edu.raf.plugins.teacher.ui
+package edu.raf.plugins.teacher.views
 
 import java.awt.*
-import java.awt.event.ActionListener
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import javax.swing.*
-import javax.swing.border.EmptyBorder
-import javax.swing.border.LineBorder
 
 class UIUtils {
     companion object {

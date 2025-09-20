@@ -1,9 +1,9 @@
-package edu.raf.plugins.teacher.ui
+package edu.raf.plugins.teacher.views
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.models.Subject
-import edu.raf.plugins.teacher.ui.UIUtils.Companion.addHint
+import edu.raf.plugins.teacher.views.UIUtils.Companion.addHint
 import edu.raf.plugins.teacher.utils.ImageLoader
 import edu.raf.plugins.teacher.utils.Utils.Companion.generateSchoolYear
 import java.awt.*

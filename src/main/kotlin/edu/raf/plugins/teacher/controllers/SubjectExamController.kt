@@ -8,7 +8,7 @@ import edu.raf.plugins.teacher.listeners.ExamViewListener
 import edu.raf.plugins.teacher.models.Subject
 import edu.raf.plugins.teacher.services.ExamService
 import edu.raf.plugins.teacher.services.SubjectService
-import edu.raf.plugins.teacher.ui.CreateExamView
+import edu.raf.plugins.teacher.views.CreateExamView
 import io.sentry.Sentry
 import java.awt.CardLayout
 import javax.swing.JOptionPane

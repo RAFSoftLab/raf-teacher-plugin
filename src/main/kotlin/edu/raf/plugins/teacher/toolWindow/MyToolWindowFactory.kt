@@ -11,9 +11,9 @@ import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
 import edu.raf.plugins.teacher.listeners.selection.SetUpSelectionListener
 import edu.raf.plugins.teacher.services.CommentService
-import edu.raf.plugins.teacher.ui.CommentsView
-import edu.raf.plugins.teacher.ui.CreateExamView
-import edu.raf.plugins.teacher.ui.GetStudentSolutionsView
+import edu.raf.plugins.teacher.views.CommentsView
+import edu.raf.plugins.teacher.views.CreateExamView
+import edu.raf.plugins.teacher.views.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
 import io.sentry.Sentry
 

@@ -1,4 +1,4 @@
-package edu.raf.plugins.teacher.ui
+package edu.raf.plugins.teacher.views
 
 import edu.raf.plugins.teacher.constants.ConstantsUtil
 import edu.raf.plugins.teacher.listeners.DeleteCommentListener

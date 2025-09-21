@@ -8,19 +8,30 @@ on:
 
 jobs:
   deploy:
-    # Pokreće se samo ako je Bump Plugin Version uspješno završen na prod grani
+    # Pokreće se samo ako je bump uspješan i na prod grani
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'prod' }}
 
     runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+
     env:
       PRODUCTION_SERVER_USERNAME: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
       PRODUCTION_SERVER_PASSWORD: ${{ secrets.PRODUCTION_SERVER_PASSWORD }}
       PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
 
     steps:
+      - name: Debug workflow info
+        run: |
+          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
+          echo "Head branch: ${{ github.event.workflow_run.head_branch }}"
+          echo "Should run: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'prod' }}"
+
       - uses: actions/checkout@v3
         with:
-          ref: prod  # Checkout prod granu umesto main
+          ref: prod
 
       - name: Create config.properties
         run: |
@@ -79,4 +90,4 @@ jobs:
             
             # Zameni originalni fajl
             mv "$TEMP_XML" /var/www/intellij-plugins/updatePlugins.xml
-            rm -f "$TEMP_XML
+            rm -f "$TEMP_XML"

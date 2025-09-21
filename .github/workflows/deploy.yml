@@ -8,13 +8,19 @@ on:
 
 jobs:
   deploy:
+    # Pokreće se samo ako je Bump Plugin Version uspješno završen na prod grani
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'prod' }}
+
     runs-on: ubuntu-latest
     env:
       PRODUCTION_SERVER_USERNAME: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
       PRODUCTION_SERVER_PASSWORD: ${{ secrets.PRODUCTION_SERVER_PASSWORD }}
       PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
+
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: prod  # Checkout prod granu umesto main
 
       - name: Create config.properties
         run: |
@@ -42,13 +48,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Pronađi najnoviji ZIP fajl
-            LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
+            LATEST_ZIP=$(ls -t /var/www/intellij-plugins/nastavnicki-plugin-*.zip | head -n 1)
             
-            # Ekstrahuj verziju (ispravka za grešku u varijabli: LATEST_ZIP umesto LATEST_ZIP)
+            # Ekstrahuj verziju
             VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
             
             # URL za novi plugin
-            PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
+            PLUGIN_URL="http://157.180.37.247/$(basename "$LATEST_ZIP")"
             
             # Privremeni XML fajl
             TEMP_XML="/tmp/updatePlugins_temp.xml"
@@ -73,4 +79,4 @@ jobs:
             
             # Zameni originalni fajl
             mv "$TEMP_XML" /var/www/intellij-plugins/updatePlugins.xml
-            rm -f "$TEMP_XML"
+            rm -f "$TEMP_XML

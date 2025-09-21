@@ -8,28 +8,13 @@ on:
 
 jobs:
   deploy:
-
     runs-on: ubuntu-latest
-
-    permissions:
-      actions: read
-      contents: read
-
     env:
       PRODUCTION_SERVER_USERNAME: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
       PRODUCTION_SERVER_PASSWORD: ${{ secrets.PRODUCTION_SERVER_PASSWORD }}
       PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
-
     steps:
-      - name: Debug workflow info
-        run: |
-          echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "Head branch: ${{ github.event.workflow_run.head_branch }}"
-          echo "Should run: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'prod' }}"
-
       - uses: actions/checkout@v3
-        with:
-          ref: prod
 
       - name: Create config.properties
         run: |
@@ -57,53 +42,35 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Pronađi najnoviji ZIP fajl
-            cd /var/www/intellij-plugins/
-            LATEST_ZIP=$(ls -t nastavnicki-plugin-*.zip | head -n 1)
-
-            # Ekstrahuj verziju
-            VERSION=$(echo "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
-            echo "Version extracted: $VERSION"
-
+            LATEST_ZIP=$(ls -t /var/www/intellij-plugins/build/distributions/nastavnicki-plugin-*.zip | head -n 1)
+            
+            # Ekstrahuj verziju (ispravka za grešku u varijabli: LATEST_ZIP umesto LATEST_ZIP)
+            VERSION=$(basename "$LATEST_ZIP" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
+            
             # URL za novi plugin
-            PLUGIN_URL="http://157.180.37.247/$LATEST_ZIP"
-            echo "Plugin URL: $PLUGIN_URL"
-
+            PLUGIN_URL="http://157.180.37.247/build/distributions/$(basename "$LATEST_ZIP")"
+            
             # Privremeni XML fajl
             TEMP_XML="/tmp/updatePlugins_temp.xml"
-
-            # Proveri da li XML fajl postoji, ako ne kreiraj osnovni
-            if [ ! -f updatePlugins.xml ]; then
-              echo '<?xml version="1.0" encoding="UTF-8"?><plugins></plugins>' > updatePlugins.xml
-            fi
-
-            # Ažuriraj XML - jednostavniji pristup
-            # Prvo proverimo da li plugin već postoji i obrišemo ga ako da
-            if xmlstarlet sel -t -v "/plugins/plugin[@id='com.raf.nastavnicki']" updatePlugins.xml > /dev/null 2>&1; then
-              echo "Removing existing plugin entry..."
-              xmlstarlet ed -L -d "/plugins/plugin[@id='com.raf.nastavnicki']" updatePlugins.xml
-            fi
-
-            # Dodaj novi plugin entry
-            echo "Adding new plugin entry..."
-            xmlstarlet ed -L \
-              -s "/plugins" -t elem -n "plugin" -v "" \
-              -s "/plugins/plugin[last()]" -t attr -n "id" -v "com.raf.nastavnicki" \
-              -s "/plugins/plugin[last()]" -t attr -n "url" -v "$PLUGIN_URL" \
-              -s "/plugins/plugin[last()]" -t attr -n "version" -v "$VERSION" \
-              -s "/plugins/plugin[last()]" -t elem -n "name" -v "Nastavnički Plugin - RAF" \
-              -s "/plugins/plugin[last()]" -t elem -n "description" -v "Plugin za nastavnike u IntelliJ-u" \
-              -s "/plugins/plugin[last()]" -t elem -n "idea-version" \
-              -s "/plugins/plugin[last()]/idea-version" -t attr -n "since-build" -v "241.0" \
-              -s "/plugins/plugin[last()]/idea-version" -t attr -n "until-build" -v "999.*" \
-              -s "/plugins/plugin[last()]" -t elem -n "vendor" \
-              -s "/plugins/plugin[last()]/vendor" -t attr -n "email" -v "zarkoned@outlook.com" \
-              -s "/plugins/plugin[last()]/vendor" -t attr -n "url" -v "https://raf.edu.rs" \
-              updatePlugins.xml
-
-            # Proveri rezultat
-            echo "=== XML Content ==="
-            cat updatePlugins.xml
-            echo "=== Version attribute ==="
-            xmlstarlet sel -t -v "/plugins/plugin[@id='com.raf.nastavnicki']/@version" updatePlugins.xml
-            echo "=== URL attribute ==="
-            xmlstarlet sel -t -v "/plugins/plugin[@id='com.raf.nastavnicki']/@url" updatePlugins.xml
+            
+            # Ažuriraj XML
+            xmlstarlet ed \
+              --subnode "/plugins" --type elem -n "plugin" -v "" \
+              --insert "/plugins/plugin[last()]" --type attr -n "id" -v "com.raf.nastavnicki" \
+              --insert "/plugins/plugin[last()]" --type attr -n "url" -v "$PLUGIN_URL" \
+              --insert "/plugins/plugin[last()]" --type attr -n "version" -v "$VERSION" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "name" -v "Nastavnički Plugin - RAF" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "description" -v "Plugin za nastavnike u IntelliJ-u" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "idea-version" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "since-build" -v "241.0" \
+              --insert "/plugins/plugin[last()]/idea-version" --type attr -n "until-build" -v "999.*" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "vendor" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "email" -v "zarkoned@outlook.com" \
+              --insert "/plugins/plugin[last()]/vendor" --type attr -n "url" -v "https://raf.edu.rs" \
+              --subnode "/plugins/plugin[last()]" --type elem -n "icon" \
+              --insert "/plugins/plugin[last()]/icon" --type attr -n "url" -v "http://157.180.37.247/pluginIcon.svg" \
+              /var/www/intellij-plugins/updatePlugins.xml > "$TEMP_XML"
+            
+            # Zameni originalni fajl
+            mv "$TEMP_XML" /var/www/intellij-plugins/updatePlugins.xml
+            rm -f "$TEMP_XML"

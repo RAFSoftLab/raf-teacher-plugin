@@ -7,8 +7,7 @@ on:
 
 jobs:
   bump-version:
-    # Pokreće se samo ako je PR merge-ovan (ne ako je zatvoren bez merge-a)
-    if: github.event.pull_request.merged == true
+
 
     runs-on: ubuntu-latest
 

@@ -34,7 +34,6 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
-
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
@@ -70,6 +69,20 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55") //JCraft
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3") // Ažurirana verzija JSON to Class serijalizacija
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")// Dot ENV
+    implementation("org.junit.jupiter:junit-jupiter-api:5.11.0") // JUnit 5
+    implementation("io.mockk:mockk:1.13.10") // Mocking
+    implementation("org.jetbrains.kotlin:kotlin-test") // Kotlin test
+    implementation(fileTree("libs") { include("*.jar") }) // Lokalni JAR fajlovi
+
+// Biblioteke koje TeacherStub zahteva (prepisano iz njegovog build.gradle.kts)
+    implementation("org.springframework:spring-web:6.1.6")
+    implementation("org.springframework:spring-core:6.1.6")
+    compileOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2")
+    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    implementation("jakarta.activation:jakarta.activation-api:2.1.1")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
+
+    implementation("org.zeroturnaround:zt-zip:1.17")
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html

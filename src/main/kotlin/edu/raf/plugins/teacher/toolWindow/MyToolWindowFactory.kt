@@ -1,6 +1,10 @@
 package edu.raf.plugins.teacher.toolWindow
 
 
+import com.intellij.ide.actions.runAnything.RunAnythingContext.BrowseRecentDirectoryContext.label
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -16,6 +20,10 @@ import edu.raf.plugins.teacher.views.CreateExamView
 import edu.raf.plugins.teacher.views.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
 import io.sentry.Sentry
+import kotlinx.html.InputType
+import raflms.teacherstub.api.TeacherStubService
+import raflms.teacherstub.config.ConfigFactory
+import raflms.teacherstub.config.TeacherStubConfig
 
 import java.awt.CardLayout
 import java.awt.Image
@@ -28,13 +36,49 @@ class MyToolWindowFactory : ToolWindowFactory {
 
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
- //2.1.9 verzija
+        //2.1.9 verzija
         Sentry.init { options ->
-            options.dsn = "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
+            options.dsn =
+                "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
             options.isDebug = true // Omogućava debug mod
         }
 
-        ("Postavicu listener")
+        // POKRETANJE TESTA U POZADINI
+        object : Task.Backgroundable(project, "Povezivanje sa backendom") {
+            override fun run(indicator: ProgressIndicator) {
+                try {
+                    // 1. Inicijalizacija
+                    val config = ConfigFactory.createConfig()
+                    val service = TeacherStubService(config)
+
+                    // 2. Poziv metode
+                    println("STUB TEST: Pokrećem registraciju...")
+                    val uspeh = service.registerStudentForTest(
+                        "mojsupertest", "Zarko", "Test", 1, "RN", "2026"
+                    )
+
+                    // 3. Ažuriranje UI-ja sa rezultatom
+                    ApplicationManager.getApplication().invokeLater {
+                        val message = if (uspeh) {
+                            "STUB RADI: Student registrovan!"
+                        } else {
+                            "STUB ODGOVORIO: Neuspešna registracija (proveri parametre na backendu)."
+                        }
+
+                        // Standardni IntelliJ popup dijalog koji uvek radi
+                        com.intellij.openapi.ui.Messages.showInfoMessage(
+                            project,
+                            message,
+                            "Rezultat Stub Testiranja"
+                        )
+                    }
+                } catch (e: Exception) {
+                    println("STUB TEST GREŠKA: ${e.message}")
+                    print(e)
+                }
+            }
+        }.queue()
+
         val commentService = project.getService(CommentService::class.java)
         val selectionListener = SetUpSelectionListener.getInstance(project)
         selectionListener.setupEditorListener()
@@ -44,21 +88,39 @@ class MyToolWindowFactory : ToolWindowFactory {
         val mainPanel = JPanel(cardLayout)
 
         // Početni meni
+        // 1. Inicijalizacija dugmad bez ikona (da bi se odmah pojavila)
         val menuPanel = JPanel()
-        val createExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.CREATE_EXAM_IMAGE)))
-        val downloadExamIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.DOWNLOAD_EXAM_IMAGE)))
-        val commentsSectionIcon = ImageIcon(URL(ImageLoader.getImageUrl(ConstantsUtil.COMMENT_IMAGE)))
+        val createTestButton = JButton("Postavi proveru znanja")
+        val downloadExamButton = JButton("Preuzmi studentska rešenja")
+        val commentsSectionButton = JButton("Komentari")
 
-        val createTestButton: JButton = JButton("Postavi proveru znanja").apply {
-            icon = ImageIcon(createExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
-        }
+        menuPanel.add(createTestButton)
+        menuPanel.add(downloadExamButton)
+        menuPanel.add(commentsSectionButton)
 
-        val downloadExamButton: JButton = JButton("Preuzmi studentska rešenja").apply {
-            icon = ImageIcon(downloadExamIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
-        }
+// 2. Pokrece učitavanje ikona u pozadinskom thread-u
+        ApplicationManager.getApplication().executeOnPooledThread {
+            try {
+                // Mapa koja povezuje dugme sa njegovim URL-om
+                val jobMap = mapOf(
+                    createTestButton to ConstantsUtil.CREATE_EXAM_IMAGE,
+                    downloadExamButton to ConstantsUtil.DOWNLOAD_EXAM_IMAGE,
+                    commentsSectionButton to ConstantsUtil.COMMENT_IMAGE
+                )
 
-        val commentsSectionButton: JButton = JButton("Komentari").apply {
-            icon = ImageIcon(commentsSectionIcon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
+                for ((button, imageConst) in jobMap) {
+                    val urlString = ImageLoader.getImageUrl(imageConst)
+                    val icon = ImageIcon(URL(urlString))
+                    val scaledIcon = ImageIcon(icon.image.getScaledInstance(45, 45, Image.SCALE_SMOOTH))
+
+                    // 3. Kada je slika spremna, vrati se na UI thread da je postaviš na dugme
+                    ApplicationManager.getApplication().invokeLater {
+                        button.icon = scaledIcon
+                    }
+                }
+            } catch (e: Exception) {
+                println("Greška pri učitavanju ikona: ${e.message}")
+            }
         }
 
 

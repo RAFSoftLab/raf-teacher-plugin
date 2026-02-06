@@ -34,6 +34,7 @@ kotlin {
 // Configure project's dependencies
 repositories {
     mavenCentral()
+    maven { url = uri("https://jitpack.io") }
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
@@ -83,6 +84,9 @@ dependencies {
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
 
     implementation("org.zeroturnaround:zt-zip:1.17")
+
+    // Jit za stub dependecy
+    implementation("com.github.zarko-ned:teacher-plugin-stub-profesorka:v1.0.3")
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html

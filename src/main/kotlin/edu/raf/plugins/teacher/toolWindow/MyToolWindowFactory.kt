@@ -34,14 +34,24 @@ import javax.swing.JPanel
 
 class MyToolWindowFactory : ToolWindowFactory {
 
+    // Koristimo companion object da se Sentry inicijalizuje samo JEDNOM po pokretanju IDE-a
+    companion object {
+        private var sentryInitialized = false
+        fun initSentry() {
+            if (!sentryInitialized) {
+                //2.1.9 verzija
+                Sentry.init { options ->
+                    options.dsn =
+                        "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
+                    options.isDebug = true // Omogućava debug mod
+                }
+                sentryInitialized = true
+            }
+        }
+    }
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        //2.1.9 verzija
-        Sentry.init { options ->
-            options.dsn =
-                "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
-            options.isDebug = true // Omogućava debug mod
-        }
+        initSentry() // Inicijalizacija Sentry-a
 
         // POKRETANJE TESTA U POZADINI
         object : Task.Backgroundable(project, "Povezivanje sa backendom") {

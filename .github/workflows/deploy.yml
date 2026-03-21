@@ -13,7 +13,6 @@ jobs:
       PRODUCTION_SERVER_USERNAME: ${{ secrets.PRODUCTION_SERVER_USERNAME }}
       PRODUCTION_SERVER_PASSWORD: ${{ secrets.PRODUCTION_SERVER_PASSWORD }}
       PRODUCTION_SERVER_HOST: ${{ secrets.PRODUCTION_SERVER_HOST }}
-      # Putanja na serveru gde želiš fajlove
       REMOTE_TARGET: "/var/www/intellij-plugins/"
 
     steps:
@@ -36,8 +35,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "build/distributions/*.zip"
           target: ${{ env.REMOTE_TARGET }}
-          # Ostavljamo strip_components isključen (default: 0)
-          # da bi na serveru napravio build/distributions/ strukturu
 
       - name: Update updatePlugins.xml
         uses: appleboy/ssh-action@v0.1.7
@@ -47,35 +44,35 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # 1. Putanje na serveru
-            BASE_DIR="${{ env.REMOTE_TARGET }}"
+            BASE_DIR="/var/www/intellij-plugins"
             DIST_DIR="$BASE_DIR/build/distributions"
             XML_PATH="$BASE_DIR/updatePlugins.xml"
             
-            # 2. Pronalaženje ZIP-a (Paziti na raf-teacher-plugin prefix iz logova)
-            LATEST_ZIP=$(ls -t $DIST_DIR/raf-teacher-plugin-*.zip 2>/dev/null | head -n 1)
+            # 2. Pronalaženje ZIP-a (prefiks nastavnicki-plugin na osnovu listinga)
+            LATEST_ZIP=$(ls -t $DIST_DIR/nastavnicki-plugin-*.zip 2>/dev/null | head -n 1)
             
             if [ -z "$LATEST_ZIP" ]; then
               echo "GRESKA: ZIP fajl nije pronadjen u $DIST_DIR"
-              ls -R $BASE_DIR # Ispisujemo strukturu radi debugginga u GitHub logu
+              ls -la $DIST_DIR
               exit 1
             fi
             
             FILENAME=$(basename "$LATEST_ZIP")
             
-            # 3. Ekstrakcija verzije (npr. iz raf-teacher-plugin-2.2.22.zip izvlači 2.2.22)
-            VERSION=$(echo "$FILENAME" | sed -E 's/raf-teacher-plugin-(.*)\.zip/\1/')
+            # 3. Ekstrakcija verzije
+            VERSION=$(echo "$FILENAME" | sed -E 's/nastavnicki-plugin-(.*)\.zip/\1/')
             
-            # 4. URL za IntelliJ (mora sadržati celu putanju do fajla)
+            # 4. URL za IntelliJ
             PLUGIN_URL="http://157.180.37.247/build/distributions/$FILENAME"
             
             echo "Ažuriram na verziju: $VERSION"
             echo "URL fajla: $PLUGIN_URL"
-
+            
             # 5. Inicijalizacija XML-a ako ne postoji
             if [ ! -f "$XML_PATH" ]; then
                echo '<?xml version="1.0" encoding="UTF-8"?><plugins></plugins>' > "$XML_PATH"
             fi
-
+            
             # 6. Ažuriranje XML-a pomoću xmlstarlet
             TEMP_XML="/tmp/updatePlugins_temp.xml"
             
@@ -97,4 +94,4 @@ jobs:
               "$XML_PATH" > "$TEMP_XML"
             
             mv "$TEMP_XML" "$XML_PATH"
-            echo "XML uspešno ažuriran na putanji $XML_PATH"
+            echo "XML uspešno ažuriran."

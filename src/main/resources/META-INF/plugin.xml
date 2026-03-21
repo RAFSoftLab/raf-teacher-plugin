@@ -3,6 +3,9 @@
     <name>nastavnicki-plugin</name>
     <vendor email="zarkoned@outlook.com" url="https://raf.edu.rs">Žarko Nedeljković</vendor>
 
+
+    <depends>com.intellij.modules.java</depends>
+
     <version>${pluginVersion}</version> <!-- Ažurirano , uzima iz gradle.properties-->
     <description>Plugin za nastavnike u IntelliJ-u</description>
     <idea-version since-build="241.0" until-build="242.*"/>  <!-- Ažurirano za 2024.2.3 -->

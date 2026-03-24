@@ -1,4 +1,4 @@
-<!-- Plugin description -->
+<!-- Plugin description --> 
 Nastavnički Intellij plugin koji omogućava profesorima jednostavno upravljanje studentskim zadacima i rešenjima, olakšavajući kreiranje i preuzimanje ispitnih materijala, kao i organizovanje i praćenje studentskih odgovora
 <!-- Plugin description end -->
 

@@ -1,21 +1,65 @@
 package edu.raf.plugins.teacher.toolWindow
 
+
+
+import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.notification.*
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
-import edu.raf.plugins.teacher.listeners.selection.SetUpSelectionListener
-
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.options.ShowSettingsUtil
+import io.sentry.Sentry
+import java.net.URL
 
 class PluginStartupActivity : StartupActivity {
 
     override fun runActivity(project: Project) {
-        ("Postavicu listener iz start upa")
-//        val selectionListener = SetUpSelectionListener.getInstance(project)
-//        selectionListener.setupEditorListener()
-//
-//
-//        Sentry.init { options ->
-//            options.dsn = "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
-//            options.isDebug = true // Omogućava debug mod
-//        }
+        ApplicationManager.getApplication().executeOnPooledThread {
+            checkPluginUpdate(project)
+        }
+    }
+
+    private fun checkPluginUpdate(project: Project) {
+        try {
+            val pluginId = PluginId.getId("com.zarko.nastavnicki")
+            val currentVersion = PluginManagerCore.getPlugin(pluginId)?.version ?: "0.0.0"
+
+            val xmlContent = URL("http://157.180.37.247/updatePlugins.xml").readText()
+
+            // REGEX objašnjenje:
+            // version=" -> traži bukvalan tekst
+            // (.*?)     -> hvata sve unutar (to je naša verzija)
+            // "         -> do sledećeg navodnika
+            val regex = "version=\"(.*?)\"".toRegex()
+
+            // Uzimamo SVA pojavljivanja i biramo POSLEDNJE (najnovija verzija)
+            val matches = regex.findAll(xmlContent)
+            val latestVersion = matches.lastOrNull()?.groupValues?.get(1) ?: ""
+
+            if (latestVersion.isNotEmpty() && latestVersion != currentVersion) {
+                showUpdateNotification(project, currentVersion, latestVersion)
+            }
+        } catch (e: Exception) {
+            Sentry.captureException(e)
+        }
+    }
+
+    private fun showUpdateNotification(project: Project, oldVersion: String, newVersion: String) {
+       println("Nova verzija dostupna: ($newVersion)")
+        val notificationGroup = NotificationGroupManager.getInstance()
+            .getNotificationGroup("RAF LMS Updates")
+
+        val notification = notificationGroup.createNotification(
+            "🚀 Nova verzija je dostupna!",
+            "Vaša verzija: $oldVersion -> Nova: $newVersion.\nAžurirajte plugin za nove funkcije.",
+            NotificationType.IDE_UPDATE
+        )
+
+        notification.addAction(NotificationAction.createSimple("Otvori Plugins") {
+            ShowSettingsUtil.getInstance().showSettingsDialog(project, "Plugins")
+        })
+
+        Notifications.Bus.notify(notification, project)
     }
 }

@@ -15,6 +15,13 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="edu.raf.plugins.teacher.toolWindow.MyToolWindowFactory" id="Nastavnički plugin" icon="/icons/pluginIcon.svg"/>
+
+        <notificationGroup id="RAF LMS Updates"
+                           displayType="BALLOON"
+                           isLogByDefault="true"/>
+
+        <postStartupActivity implementation="edu.raf.plugins.teacher.toolWindow.PluginStartupActivity"/>
+
     </extensions>
 
     <applicationListeners>

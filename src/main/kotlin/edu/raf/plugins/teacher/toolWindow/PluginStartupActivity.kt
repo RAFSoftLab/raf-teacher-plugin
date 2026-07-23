@@ -9,12 +9,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.StartupActivity
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.ShowSettingsUtil
+import edu.raf.plugins.teacher.utils.ConfigLoader
+import edu.raf.plugins.teacher.utils.SentryInitializer
 import io.sentry.Sentry
 import java.net.URL
 
 class PluginStartupActivity : StartupActivity {
 
     override fun runActivity(project: Project) {
+        SentryInitializer.init()
         ApplicationManager.getApplication().executeOnPooledThread {
             checkPluginUpdate(project)
         }
@@ -22,10 +25,10 @@ class PluginStartupActivity : StartupActivity {
 
     private fun checkPluginUpdate(project: Project) {
         try {
-            val pluginId = PluginId.getId("com.zarko.nastavnicki")
+            val pluginId = PluginId.getId(ConfigLoader.get("plugin.id"))
             val currentVersion = PluginManagerCore.getPlugin(pluginId)?.version ?: "0.0.0"
 
-            val xmlContent = URL("http://157.180.37.247/updatePlugins.xml").readText()
+            val xmlContent = URL(ConfigLoader.get("plugin.xml")).readText()
 
             // REGEX objašnjenje:
             // version=" -> traži bukvalan tekst
@@ -46,7 +49,7 @@ class PluginStartupActivity : StartupActivity {
     }
 
     private fun showUpdateNotification(project: Project, oldVersion: String, newVersion: String) {
-       println("Nova verzija dostupna: ($newVersion)")
+       println("Nova verzija nastavničkog plugina je dostupna: ($newVersion)")
         val notificationGroup = NotificationGroupManager.getInstance()
             .getNotificationGroup("RAF LMS Updates")
 

@@ -19,7 +19,7 @@ import edu.raf.plugins.teacher.views.CommentsView
 import edu.raf.plugins.teacher.views.CreateExamView
 import edu.raf.plugins.teacher.views.GetStudentSolutionsView
 import edu.raf.plugins.teacher.utils.ImageLoader
-import io.sentry.Sentry
+import edu.raf.plugins.teacher.utils.SentryInitializer
 import kotlinx.html.InputType
 import raflms.teacherstub.api.TeacherStubService
 import raflms.teacherstub.config.ConfigFactory
@@ -34,24 +34,8 @@ import javax.swing.JPanel
 
 class MyToolWindowFactory : ToolWindowFactory {
 
-    // Koristimo companion object da se Sentry inicijalizuje samo JEDNOM po pokretanju IDE-a
-    companion object {
-        private var sentryInitialized = false
-        fun initSentry() {
-            if (!sentryInitialized) {
-                //2.1.9 verzija
-                Sentry.init { options ->
-                    options.dsn =
-                        "https://ded7d252c6c25bc6db783375495f383b@o4509723131838464.ingest.de.sentry.io/4509723138195536"
-                    options.isDebug = true // Omogućava debug mod
-                }
-                sentryInitialized = true
-            }
-        }
-    }
-
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        initSentry() // Inicijalizacija Sentry-a
+        SentryInitializer.init() // fallback ako StartupActivity iz nekog razloga nije stigla da inicijalizuje
 
         // POKRETANJE TESTA U POZADINI
         object : Task.Backgroundable(project, "Povezivanje sa backendom") {

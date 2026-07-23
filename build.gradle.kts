@@ -11,18 +11,9 @@ plugins {
     alias(libs.plugins.qodana) // Gradle Qodana Plugin
     alias(libs.plugins.kover) // Gradle Kover Plugin
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.25"
-    id("io.sentry.jvm.gradle") version "3.14.0" // Updated to stable version
+    id("sentry-convention")
 }
 
-// Load environment variables environment variables using Java's built-in properties
-val env: Map<String, String> = System.getenv()
-
-sentry {
-    includeSourceContext.set(true)
-    org.set("raf-2p")
-    projectName.set("teacher-plugin")
-    authToken.set(env["SENTRY_AUTH_TOKEN"])
-}
 group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 

@@ -19,7 +19,7 @@ version = providers.gradleProperty("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 // Configure project's dependencies
@@ -66,18 +66,29 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-test") // Kotlin test
     implementation(fileTree("libs") { include("*.jar") }) // Lokalni JAR fajlovi
 
-// Biblioteke koje TeacherStub zahteva (prepisano iz njegovog build.gradle.kts)
-    implementation("org.springframework:spring-web:6.1.6")
-    implementation("org.springframework:spring-core:6.1.6")
-    compileOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2")
-    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
-    implementation("jakarta.activation:jakarta.activation-api:2.1.1")
-    implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
-
-    implementation("org.zeroturnaround:zt-zip:1.17")
+//// Biblioteke koje TeacherStub zahteva (prepisano iz njegovog build.gradle.kts)
+//    implementation("org.springframework:spring-web:6.1.6")
+//    implementation("org.springframework:spring-core:6.1.6")
+//    compileOnly("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.2")
+//    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
+//    implementation("jakarta.activation:jakarta.activation-api:2.1.1")
+//    implementation("jakarta.xml.bind:jakarta.xml.bind-api:3.0.1")
+//
+//    implementation("org.zeroturnaround:zt-zip:1.17")
 
     // Jit za stub dependecy
-    implementation("com.github.zarko-ned:teacher-plugin-stub-profesorka:v1.0.3")
+    dependencies {
+        implementation("com.github.RAFSoftLab.raflms-modular:studentstub:master-SNAPSHOT") {
+            exclude(group = "com.fasterxml.jackson.core")
+            exclude(group = "com.fasterxml.jackson.module")
+            exclude(group = "com.fasterxml.jackson.datatype")
+        }
+        implementation("com.github.RAFSoftLab.raflms-modular:teacherstub:master-SNAPSHOT") {
+            exclude(group = "com.fasterxml.jackson.core")
+            exclude(group = "com.fasterxml.jackson.module")
+            exclude(group = "com.fasterxml.jackson.datatype")
+        }
+    }
 }
 
 // Configure IntelliJ Platform Gradle Plugin - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html

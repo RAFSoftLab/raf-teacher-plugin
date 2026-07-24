@@ -22,8 +22,11 @@ import edu.raf.plugins.teacher.utils.ImageLoader
 import edu.raf.plugins.teacher.utils.SentryInitializer
 import kotlinx.html.InputType
 import raflms.teacherstub.api.TeacherStubService
-import raflms.teacherstub.config.ConfigFactory
+
+import raflms.teacherstub.config.ConfigFactory as TeacherConfigFactory
+import raflms.studentstub.config.ConfigFactory as StudentConfigFactory
 import raflms.teacherstub.config.TeacherStubConfig
+import raflms.studentstub.api.StudentStubService
 
 import java.awt.CardLayout
 import java.awt.Image
@@ -42,12 +45,15 @@ class MyToolWindowFactory : ToolWindowFactory {
             override fun run(indicator: ProgressIndicator) {
                 try {
                     // 1. Inicijalizacija
-                    val config = ConfigFactory.createConfig()
-                    val service = TeacherStubService(config)
+                    val teacherConfig = TeacherConfigFactory.createConfig()
+                    val studentConfig = StudentConfigFactory.createConfig()
+
+                    val teacherService = TeacherStubService(teacherConfig)
+                    val studentService = StudentStubService(studentConfig)
 
                     // 2. Poziv metode
                     println("STUB TEST: Pokrećem registraciju...")
-                    val uspeh = service.registerStudentForTest(
+                    val uspeh = teacherService.registerStudentForTest(
                         "mojsupertest", "Zarko", "Test", 1, "RN", "2026"
                     )
 
@@ -65,6 +71,12 @@ class MyToolWindowFactory : ToolWindowFactory {
                             message,
                             "Rezultat Stub Testiranja"
                         )
+                    }
+
+                    println("Student stub")
+                    val allTestsData = studentService.allTestsWithAssigmentsData
+                    allTestsData.forEach { test ->
+                        println(test)
                     }
                 } catch (e: Exception) {
                     println("STUB TEST GREŠKA: ${e.message}")

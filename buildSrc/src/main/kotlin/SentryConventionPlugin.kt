@@ -7,10 +7,10 @@ class SentryConventionPlugin : Plugin<Project> {
         pluginManager.apply("io.sentry.jvm.gradle")
 
         extensions.configure(SentryPluginExtension::class.java) {
-            it.includeSourceContext.set(true)
-            it.org.set("raf-2p")
-            it.projectName.set("teacher-plugin")
-            it.authToken.set(providers.environmentVariable("SENTRY_AUTH_TOKEN"))
+            includeSourceContext.set(true)
+            org.set("raf-2p")
+            projectName.set("teacher-plugin")
+            authToken.set(providers.environmentVariable("SENTRY_AUTH_TOKEN"))
         }
     }
 }

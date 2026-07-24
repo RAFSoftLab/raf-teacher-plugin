@@ -3,6 +3,7 @@ package edu.raf.plugins.teacher.toolWindow
 
 import com.intellij.ide.actions.runAnything.RunAnythingContext.BrowseRecentDirectoryContext.label
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
@@ -15,6 +16,7 @@ import edu.raf.plugins.teacher.controllers.StudentSolutionsController
 import edu.raf.plugins.teacher.controllers.SubjectExamController
 import edu.raf.plugins.teacher.listeners.selection.SetUpSelectionListener
 import edu.raf.plugins.teacher.services.CommentService
+import edu.raf.plugins.teacher.services.StubServiceHolder
 import edu.raf.plugins.teacher.views.CommentsView
 import edu.raf.plugins.teacher.views.CreateExamView
 import edu.raf.plugins.teacher.views.GetStudentSolutionsView
@@ -45,15 +47,12 @@ class MyToolWindowFactory : ToolWindowFactory {
             override fun run(indicator: ProgressIndicator) {
                 try {
                     // 1. Inicijalizacija
-                    val teacherConfig = TeacherConfigFactory.createConfig()
-                    val studentConfig = StudentConfigFactory.createConfig()
-
-                    val teacherService = TeacherStubService(teacherConfig)
-                    val studentService = StudentStubService(studentConfig)
+                    val holder = project.service<StubServiceHolder>()
+                    holder.studentService.getAllTestsWithAssigmentsData()
 
                     // 2. Poziv metode
                     println("STUB TEST: Pokrećem registraciju...")
-                    val uspeh = teacherService.registerStudentForTest(
+                    val uspeh = holder.teacherService.registerStudentForTest(
                         "mojsupertest", "Zarko", "Test", 1, "RN", "2026"
                     )
 
@@ -74,7 +73,7 @@ class MyToolWindowFactory : ToolWindowFactory {
                     }
 
                     println("Student stub")
-                    val allTestsData = studentService.allTestsWithAssigmentsData
+                    val allTestsData = holder.studentService.allTestsWithAssigmentsData
                     allTestsData.forEach { test ->
                         println(test)
                     }
